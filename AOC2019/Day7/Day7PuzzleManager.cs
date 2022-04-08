@@ -4,7 +4,7 @@ namespace AOC2019.Day7
 {
     public class Day7PuzzleManager : PuzzleManager
     {
-        public int[] IntCodeProgram { get; private set; }
+        public long[] IntCodeProgram { get; private set; }
 
         public Day7PuzzleManager()
         {
@@ -25,10 +25,10 @@ namespace AOC2019.Day7
             Console.WriteLine($"The solution to part one is '{solution}'.");
         }
 
-        public async Task<int> SolvePartOnePrivate()
+        public async Task<long> SolvePartOnePrivate()
         {
-            var phaseSettings = Permute(new int[] { 0, 1, 2, 3, 4 });
-            var highestOutputSetting = 0;
+            var phaseSettings = Permute(new long[] { 0, 1, 2, 3, 4 });
+            long highestOutputSetting = 0;
             foreach (var phaseSetting in phaseSettings)
             {
                 var phaseSettingArray = phaseSetting.ToArray();
@@ -37,12 +37,12 @@ namespace AOC2019.Day7
             return highestOutputSetting;
         }
 
-        private async Task<int> RunAmplifierConfigAsync(int[] phaseSettings)
+        private async Task<long> RunAmplifierConfigAsync(long[] phaseSettings)
         {
-            var outputSetting = 0;
+            long outputSetting = 0;
             for (var i = 0; i < 5; i++)
             {
-                var inputs = new Queue<int>();
+                var inputs = new Queue<long>();
                 inputs.Enqueue(phaseSettings[i]);
                 inputs.Enqueue(outputSetting);
                 outputSetting = (await ProcessAndReturnOutputs(inputs)).Last();
@@ -52,27 +52,25 @@ namespace AOC2019.Day7
 
         public async override Task SolvePartTwo()
         {
-            var phaseSettings = Permute(new int[] { 5, 6, 7, 8, 9 });
-            var highestOutputSetting = 0;
-            var counter = 0;
+            var phaseSettings = Permute(new long[] { 5, 6, 7, 8, 9 });
+            long highestOutputSetting = 0;
             foreach (var phaseSetting in phaseSettings)
             {
                 var phaseSettingArray = phaseSetting.ToArray();
                 highestOutputSetting = Math.Max(highestOutputSetting, await RunAmplifierConfigFeedbackAsync(phaseSettingArray));
-                counter++;
             }
             Console.WriteLine($"The solution to part two is '{highestOutputSetting}'.");
         }
 
-        public async Task<int> RunAmplifierConfigFeedbackAsync(int[] phaseSettings)
+        public async Task<long> RunAmplifierConfigFeedbackAsync(long[] phaseSettings)
         {
             var amplifiers = new IntCodeComputer[5];
-            var previousAmplifierOutputs = new Queue<int>();
+            var previousAmplifierOutputs = new Queue<long>();
             var previousAmplifierCancellationToken = new CancellationTokenSource();
             for (var i = 0; i < 5; i++)
             {
-                var amplifierCodeInput = (int[])IntCodeProgram.Clone();
-                var amplifierInputs = new Queue<int>();
+                var amplifierCodeInput = (long[])IntCodeProgram.Clone();
+                var amplifierInputs = new Queue<long>();
                 amplifierInputs.Enqueue(phaseSettings[i]);
                 if (i == 0)
                 {
@@ -95,27 +93,27 @@ namespace AOC2019.Day7
             return amplifiers[4].Outputs.Last();
         }
 
-        private async Task<Queue<int>> ProcessAndReturnOutputs(Queue<int> inputs)
+        private async Task<Queue<long>> ProcessAndReturnOutputs(Queue<long> inputs)
         {
-            var codeInput = (int[])IntCodeProgram.Clone();
+            var codeInput = (long[])IntCodeProgram.Clone();
             var intCodeComputer = new IntCodeComputer(codeInput, inputs);
             await intCodeComputer.ProcessAsync();
             return intCodeComputer.Outputs;
         }
 
-        private IList<IList<int>> Permute(int[] nums)
+        private IList<IList<long>> Permute(long[] nums)
         {
-            var list = new List<IList<int>>();
+            var list = new List<IList<long>>();
             return DoPermute(nums, 0, nums.Length - 1, list);
         }
 
-        private IList<IList<int>> DoPermute(int[] nums, int start, int end, IList<IList<int>> list)
+        private IList<IList<long>> DoPermute(long[] nums, long start, long end, IList<IList<long>> list)
         {
             if (start == end)
             {
                 // We have one of our possible n! solutions,
                 // add it to the list.
-                list.Add(new List<int>(nums));
+                list.Add(new List<long>(nums));
             }
             else
             {
@@ -130,7 +128,7 @@ namespace AOC2019.Day7
             return list;
         }
 
-        private void Swap(ref int a, ref int b)
+        private void Swap(ref long a, ref long b)
         {
             var temp = a;
             a = b;

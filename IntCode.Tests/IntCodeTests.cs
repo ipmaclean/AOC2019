@@ -29,7 +29,7 @@ namespace IntCode.Tests
         {
             var day5PuzzleManager = new Day5PuzzleManager();
 
-            Assert.Equal(7265618, await day5PuzzleManager.SolvePrivateAsync(1));
+            Assert.Equal(7265618, await day5PuzzleManager.ProcessAndReturnOutputs(1));
         }
 
         [Fact]
@@ -37,7 +37,7 @@ namespace IntCode.Tests
         {
             var day5PuzzleManager = new Day5PuzzleManager();
 
-            Assert.Equal(7731427, await day5PuzzleManager.SolvePrivateAsync(5));
+            Assert.Equal(7731427, await day5PuzzleManager.ProcessAndReturnOutputs(5));
         }
 
         [Fact]
@@ -53,7 +53,7 @@ namespace IntCode.Tests
         {
             var day7PuzzleManager = new Day7PuzzleManager();
 
-            var phaseArray = new int[] { 7, 6, 5, 8, 9 };
+            var phaseArray = new long[] { 7, 6, 5, 8, 9 };
 
             Assert.Equal(36384144, await day7PuzzleManager.RunAmplifierConfigFeedbackAsync(phaseArray));
         }

@@ -4,7 +4,7 @@ namespace AOC2019.Day2
 {
     public class Day2PuzzleManager : PuzzleManager
     {
-        public int[] IntCodeProgram { get; private set; }
+        public long[] IntCodeProgram { get; private set; }
         public Day2PuzzleManager()
         {
             var inputHelper = new Day2InputHelper(INPUT_FILE_NAME);
@@ -23,9 +23,9 @@ namespace AOC2019.Day2
             Console.WriteLine($"The solution to part one is '{codeOutput}'.");
         }
 
-        public async Task<int> SolvePartOnePrivateAsync(int noun, int verb)
+        public async Task<long> SolvePartOnePrivateAsync(long noun, long verb)
         {
-            var codeInput = (int[])IntCodeProgram.Clone();
+            var codeInput = (long[])IntCodeProgram.Clone();
 
             codeInput[1] = noun;
             codeInput[2] = verb;

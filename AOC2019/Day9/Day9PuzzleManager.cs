@@ -4,7 +4,7 @@ namespace AOC2019.Day9
 {
     internal class Day9PuzzleManager : PuzzleManager
     {
-        public int[] IntCodeProgram { get; private set; }
+        public long[] IntCodeProgram { get; private set; }
 
         public Day9PuzzleManager()
         {
@@ -31,9 +31,9 @@ namespace AOC2019.Day9
         }
 
 
-        private async Task<Queue<int>> SolvePrivateAsync(Queue<int> inputs)
+        private async Task<Queue<long>> SolvePrivateAsync(Queue<long> inputs)
         {
-            var codeInput = (int[])IntCodeProgram.Clone();
+            var codeInput = (long[])IntCodeProgram.Clone();
             var intCodeComputer = new IntCodeComputer(codeInput, inputs);
             await intCodeComputer.ProcessAsync();
             return intCodeComputer.Outputs;
