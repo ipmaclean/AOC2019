@@ -5,6 +5,6 @@
         public Task SolvePartOne();
         public Task SolvePartTwo();
         public Task SolveBothParts();
-        public Task Reset();
+        public void Reset();
     }
 }

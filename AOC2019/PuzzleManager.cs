@@ -4,9 +4,8 @@
     {
         protected virtual string INPUT_FILE_NAME { get; set; } = "input.txt";
 
-        public virtual Task Reset()
+        public virtual void Reset()
         {
-            return Task.CompletedTask;
         }
         public abstract Task SolveBothParts();
         public abstract Task SolvePartOne();
