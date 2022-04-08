@@ -4,7 +4,7 @@ namespace AOC2019.Day5
 {
     public class Day5PuzzleManager : PuzzleManager
     {
-        public int[] IntCodeProgram { get; private set; }
+        public Dictionary<long, long> IntCodeProgram { get; private set; }
 
         public Day5PuzzleManager()
         {
@@ -21,20 +21,20 @@ namespace AOC2019.Day5
 
         public async override Task SolvePartOne()
         {
-            var codeOutput = await SolvePrivateAsync(1);
+            var codeOutput = await ProcessAndReturnOutputs(1);
             Console.WriteLine($"The solution to part one is '{codeOutput}'.");
         }
 
         public async override Task SolvePartTwo()
         {
-            var codeOutput = await SolvePrivateAsync(5);
+            var codeOutput = await ProcessAndReturnOutputs(5);
             Console.WriteLine($"The solution to part two is '{codeOutput}'.");
         }
 
-        public async Task<int> SolvePrivateAsync(int input)
+        public async Task<long> ProcessAndReturnOutputs(long input)
         {
-            var codeInput = (int[])IntCodeProgram.Clone();
-            var inputs = new Queue<int>();
+            var codeInput = new Dictionary<long, long>(IntCodeProgram);
+            var inputs = new Queue<long>();
             inputs.Enqueue(input);
             var intCodeComputer = new IntCodeComputer(codeInput, inputs);
             await intCodeComputer.ProcessAsync();

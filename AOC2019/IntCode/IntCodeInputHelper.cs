@@ -1,18 +1,21 @@
 ﻿namespace AOC2019.IntCode
 {
-    internal class IntCodeInputHelper : InputHelper<int[]>
+    internal class IntCodeInputHelper : InputHelper<Dictionary<long, long>>
     {
         public IntCodeInputHelper(string fileName) : base(fileName)
         {
         }
 
-        public override int[] Parse()
+        public override Dictionary<long, long> Parse()
         {
-            var output = new int[0];
+            var output = new Dictionary<long, long>();
             using (var sr = new StreamReader(InputPath))
             {
                 var ints = sr.ReadLine()!.Split(',');
-                output = Array.ConvertAll(ints, int.Parse);
+                for (long i = 0; i < ints.LongLength; i++)
+                {
+                    output.Add(i, long.Parse(ints[i]));
+                }
             }
             return output;
         }
