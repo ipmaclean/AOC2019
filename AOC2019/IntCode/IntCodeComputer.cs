@@ -4,19 +4,19 @@
     {
         private long _currentPosition = 0;
         private long _relativeBase = 0;
-        private long[] _intCodeProgram;
+        private Dictionary<long, long> _intCodeProgram;
         private Queue<long> _inputs;
         public Queue<long> Outputs { get; private set; } = new Queue<long>();
         public Queue<long>? ExternalInputs { get; set; }
 
-        public IntCodeComputer(long[] intCodeProgram, Queue<long>? inputs = null, Queue<long>? externalInputs = null)
+        public IntCodeComputer(Dictionary<long, long> intCodeProgram, Queue<long>? inputs = null, Queue<long>? externalInputs = null)
         {
             _intCodeProgram = intCodeProgram;
             _inputs = inputs ?? new Queue<long>();
             ExternalInputs = externalInputs;
         }
 
-        public async Task<long[]> ProcessAsync()
+        public async Task<Dictionary<long, long>> ProcessAsync()
         {
             while ((Opcode)(_intCodeProgram[_currentPosition] % 100) != Opcode.HALT)
             {
@@ -70,17 +70,27 @@
         private long GetParameterValue(long parameterPosition, ParameterMode? parameterMode = null)
         {
             parameterMode = parameterMode ?? GetParameterMode(parameterPosition);
+            long positionToGet = -1;
             if (parameterMode == ParameterMode.POSITION)
             {
-                return _intCodeProgram[GetParameterValue(parameterPosition, ParameterMode.IMMEDIATE)];
+                positionToGet = GetParameterValue(parameterPosition, ParameterMode.IMMEDIATE);
             }
             else if (parameterMode == ParameterMode.IMMEDIATE)
             {
-                return _intCodeProgram[_currentPosition + parameterPosition];
+                positionToGet = _currentPosition + parameterPosition;
             }
             else if (parameterMode == ParameterMode.RELATIVE)
             {
-                return _intCodeProgram[_relativeBase + GetParameterValue(parameterPosition, ParameterMode.IMMEDIATE)];
+                positionToGet = _relativeBase + GetParameterValue(parameterPosition, ParameterMode.IMMEDIATE);
+            }
+
+            if (positionToGet >= 0 && _intCodeProgram.ContainsKey(positionToGet))
+            {
+                return _intCodeProgram[positionToGet];
+            }
+            else
+            {
+                return 0;
             }
             throw new ArgumentException("Could not find the matching parameter mode.");
         }
@@ -98,7 +108,15 @@
             {
                 positionToWrite = _relativeBase + GetParameterValue(parameterPosition, ParameterMode.IMMEDIATE);
             }
-            _intCodeProgram[positionToWrite] = valueToWrite;
+            if (_intCodeProgram.ContainsKey(positionToWrite))
+            {
+                _intCodeProgram[positionToWrite] = valueToWrite;
+            }
+            else
+            {
+                _intCodeProgram.Add(positionToWrite, valueToWrite);
+            }
+            
         }
 
         private void ProcessAddInstruction()

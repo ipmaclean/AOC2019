@@ -57,5 +57,21 @@ namespace IntCode.Tests
 
             Assert.Equal(36384144, await day7PuzzleManager.RunAmplifierConfigFeedbackAsync(phaseArray));
         }
+
+        [Fact]
+        public async void Day9_Part1_ShouldBeCorrect()
+        {
+            var day9PuzzleManager = new Day9PuzzleManager();
+
+            Assert.Equal(3340912345, await day9PuzzleManager.SolvePartOnePrivateAsync());
+        }
+
+        [Fact]
+        public async void Day9_Part2_ShouldBeCorrect()
+        {
+            var day9PuzzleManager = new Day9PuzzleManager();
+
+            Assert.Equal(51754, await day9PuzzleManager.SolvePartTwoPrivateAsync());
+        }
     }
 }

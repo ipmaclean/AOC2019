@@ -4,7 +4,7 @@ namespace AOC2019.Day2
 {
     public class Day2PuzzleManager : PuzzleManager
     {
-        public long[] IntCodeProgram { get; private set; }
+        public Dictionary<long, long> IntCodeProgram { get; private set; }
         public Day2PuzzleManager()
         {
             var inputHelper = new Day2InputHelper(INPUT_FILE_NAME);
@@ -25,7 +25,7 @@ namespace AOC2019.Day2
 
         public async Task<long> SolvePartOnePrivateAsync(long noun, long verb)
         {
-            var codeInput = (long[])IntCodeProgram.Clone();
+            var codeInput = new Dictionary<long, long>(IntCodeProgram);
 
             codeInput[1] = noun;
             codeInput[2] = verb;

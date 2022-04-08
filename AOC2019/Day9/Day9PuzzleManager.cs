@@ -2,9 +2,10 @@
 
 namespace AOC2019.Day9
 {
-    internal class Day9PuzzleManager : PuzzleManager
+    public class Day9PuzzleManager : PuzzleManager
     {
-        public long[] IntCodeProgram { get; private set; }
+        public Dictionary<long, long> IntCodeProgram { get; private set; }
+        //protected override string INPUT_FILE_NAME { get; set; } = "test1.txt";
 
         public Day9PuzzleManager()
         {
@@ -21,19 +22,35 @@ namespace AOC2019.Day9
 
         public async override Task SolvePartOne()
         {
-
+            var solution = await SolvePartOnePrivateAsync();
+            Console.WriteLine($"The solution to part one is '{solution}'.");
         }
 
+        public async Task<long> SolvePartOnePrivateAsync()
+        {
+            var inputs = new Queue<long>();
+            inputs.Enqueue(1);
+            var outputs = await ProcessAndReturnOutputs(inputs);
+            return outputs.Last();
+        }
 
         public async override Task SolvePartTwo()
         {
-
+            var solution = await SolvePartTwoPrivateAsync();
+            Console.WriteLine($"The solution to part two is '{solution}'.");
         }
 
-
-        private async Task<Queue<long>> SolvePrivateAsync(Queue<long> inputs)
+        public async Task<long> SolvePartTwoPrivateAsync()
         {
-            var codeInput = (long[])IntCodeProgram.Clone();
+            var inputs = new Queue<long>();
+            inputs.Enqueue(2);
+            var outputs = await ProcessAndReturnOutputs(inputs);
+            return outputs.Last();
+        }
+
+        private async Task<Queue<long>> ProcessAndReturnOutputs(Queue<long>? inputs)
+        {
+            var codeInput = new Dictionary<long, long>(IntCodeProgram);
             var intCodeComputer = new IntCodeComputer(codeInput, inputs);
             await intCodeComputer.ProcessAsync();
             return intCodeComputer.Outputs;

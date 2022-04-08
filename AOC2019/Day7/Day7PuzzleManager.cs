@@ -4,7 +4,7 @@ namespace AOC2019.Day7
 {
     public class Day7PuzzleManager : PuzzleManager
     {
-        public long[] IntCodeProgram { get; private set; }
+        public Dictionary<long, long> IntCodeProgram { get; private set; }
 
         public Day7PuzzleManager()
         {
@@ -69,7 +69,7 @@ namespace AOC2019.Day7
             var previousAmplifierCancellationToken = new CancellationTokenSource();
             for (var i = 0; i < 5; i++)
             {
-                var amplifierCodeInput = (long[])IntCodeProgram.Clone();
+                var amplifierCodeInput = new Dictionary<long, long>(IntCodeProgram);
                 var amplifierInputs = new Queue<long>();
                 amplifierInputs.Enqueue(phaseSettings[i]);
                 if (i == 0)
@@ -95,7 +95,7 @@ namespace AOC2019.Day7
 
         private async Task<Queue<long>> ProcessAndReturnOutputs(Queue<long> inputs)
         {
-            var codeInput = (long[])IntCodeProgram.Clone();
+            var codeInput = new Dictionary<long, long>(IntCodeProgram);
             var intCodeComputer = new IntCodeComputer(codeInput, inputs);
             await intCodeComputer.ProcessAsync();
             return intCodeComputer.Outputs;

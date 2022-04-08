@@ -4,7 +4,7 @@ namespace AOC2019.Day5
 {
     public class Day5PuzzleManager : PuzzleManager
     {
-        public long[] IntCodeProgram { get; private set; }
+        public Dictionary<long, long> IntCodeProgram { get; private set; }
 
         public Day5PuzzleManager()
         {
@@ -33,7 +33,7 @@ namespace AOC2019.Day5
 
         public async Task<long> ProcessAndReturnOutputs(long input)
         {
-            var codeInput = (long[])IntCodeProgram.Clone();
+            var codeInput = new Dictionary<long, long>(IntCodeProgram);
             var inputs = new Queue<long>();
             inputs.Enqueue(input);
             var intCodeComputer = new IntCodeComputer(codeInput, inputs);
