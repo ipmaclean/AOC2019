@@ -66,12 +66,11 @@
             return Task.CompletedTask;
         }
 
-        public override Task Reset()
+        public override void Reset()
         {
             var inputHelper = new Day3InputHelper(INPUT_FILE_NAME);
             WireInstructions = inputHelper.Parse();
             PositionsDictionary = new Dictionary<(int, int), PositionStatus>();
-            return Task.CompletedTask;
         }
 
         private ((int, int), int) CompleteInstruction((int, int) currentPosition, int currentSteps, Instruction instruction, int currentWire)

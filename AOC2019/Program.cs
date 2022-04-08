@@ -123,21 +123,21 @@ async Task RunPartSelecterAsync(IPuzzleManager puzzleManager)
             Console.WriteLine();
             await puzzleManager.SolvePartOne();
             Console.WriteLine();
-            await puzzleManager.Reset();
+            puzzleManager.Reset();
             await RunPartSelecterAsync(puzzleManager);
             break;
         case '2':
             Console.WriteLine();
             await puzzleManager.SolvePartTwo();
             Console.WriteLine();
-            await puzzleManager.Reset();
+            puzzleManager.Reset();
             await RunPartSelecterAsync(puzzleManager);
             break;
         case '3':
             Console.WriteLine();
             await puzzleManager.SolveBothParts();
             Console.WriteLine();
-            await puzzleManager.Reset();
+            puzzleManager.Reset();
             await RunPartSelecterAsync(puzzleManager);
             break;
         default:
