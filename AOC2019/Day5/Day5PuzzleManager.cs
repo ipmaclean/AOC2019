@@ -2,7 +2,7 @@
 
 namespace AOC2019.Day5
 {
-    internal class Day5PuzzleManager : PuzzleManager
+    public class Day5PuzzleManager : PuzzleManager
     {
         public int[] IntCodeProgram { get; private set; }
 
@@ -31,7 +31,7 @@ namespace AOC2019.Day5
             Console.WriteLine($"The solution to part two is '{codeOutput}'.");
         }
 
-        private async Task<int> SolvePrivateAsync(int input)
+        public async Task<int> SolvePrivateAsync(int input)
         {
             var codeInput = (int[])IntCodeProgram.Clone();
             var inputs = new Queue<int>();

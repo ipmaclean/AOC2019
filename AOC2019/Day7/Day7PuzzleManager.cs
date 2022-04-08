@@ -2,7 +2,7 @@
 
 namespace AOC2019.Day7
 {
-    internal class Day7PuzzleManager : PuzzleManager
+    public class Day7PuzzleManager : PuzzleManager
     {
         public int[] IntCodeProgram { get; private set; }
 
@@ -21,6 +21,12 @@ namespace AOC2019.Day7
 
         public async override Task SolvePartOne()
         {
+            var solution = await SolvePartOnePrivate();
+            Console.WriteLine($"The solution to part one is '{solution}'.");
+        }
+
+        public async Task<int> SolvePartOnePrivate()
+        {
             var phaseSettings = Permute(new int[] { 0, 1, 2, 3, 4 });
             var highestOutputSetting = 0;
             foreach (var phaseSetting in phaseSettings)
@@ -28,8 +34,7 @@ namespace AOC2019.Day7
                 var phaseSettingArray = phaseSetting.ToArray();
                 highestOutputSetting = Math.Max(highestOutputSetting, await RunAmplifierConfigAsync(phaseSettingArray));
             }
-            // need to grab the highest output
-            Console.WriteLine($"The solution to part one is '{highestOutputSetting}'.");
+            return highestOutputSetting;
         }
 
         private async Task<int> RunAmplifierConfigAsync(int[] phaseSettings)
@@ -40,7 +45,7 @@ namespace AOC2019.Day7
                 var inputs = new Queue<int>();
                 inputs.Enqueue(phaseSettings[i]);
                 inputs.Enqueue(outputSetting);
-                outputSetting = (await SolvePrivateAsync(inputs)).Last();
+                outputSetting = (await ProcessAndReturnOutputs(inputs)).Last();
             }
             return outputSetting;
         }
@@ -59,7 +64,7 @@ namespace AOC2019.Day7
             Console.WriteLine($"The solution to part two is '{highestOutputSetting}'.");
         }
 
-        private async Task<int> RunAmplifierConfigFeedbackAsync(int[] phaseSettings)
+        public async Task<int> RunAmplifierConfigFeedbackAsync(int[] phaseSettings)
         {
             var amplifiers = new IntCodeComputer[5];
             var previousAmplifierOutputs = new Queue<int>();
@@ -90,21 +95,12 @@ namespace AOC2019.Day7
             return amplifiers[4].Outputs.Last();
         }
 
-        private async Task<Queue<int>> SolvePrivateAsync(Queue<int> inputs)
+        private async Task<Queue<int>> ProcessAndReturnOutputs(Queue<int> inputs)
         {
             var codeInput = (int[])IntCodeProgram.Clone();
             var intCodeComputer = new IntCodeComputer(codeInput, inputs);
             await intCodeComputer.ProcessAsync();
             return intCodeComputer.Outputs;
-        }
-
-        private Queue<int> CombineQueues(Queue<int> leadingQueue, Queue<int> trailingQueue)
-        {
-            while (trailingQueue.Count > 0)
-            {
-                leadingQueue.Enqueue(trailingQueue.Dequeue());
-            }
-            return leadingQueue;
         }
 
         private IList<IList<int>> Permute(int[] nums)

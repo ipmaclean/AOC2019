@@ -19,11 +19,11 @@ namespace AOC2019.Day2
 
         public async override Task SolvePartOne()
         {
-            var codeOutput = await PartOnePrivateAsync(12, 2);
-            Console.WriteLine($"The solution to part one is '{codeOutput[0]}'.");
+            var codeOutput = await SolvePartOnePrivateAsync(12, 2);
+            Console.WriteLine($"The solution to part one is '{codeOutput}'.");
         }
 
-        private async Task<int[]> PartOnePrivateAsync(int noun, int verb)
+        public async Task<int> SolvePartOnePrivateAsync(int noun, int verb)
         {
             var codeInput = (int[])IntCodeProgram.Clone();
 
@@ -31,22 +31,29 @@ namespace AOC2019.Day2
             codeInput[2] = verb;
 
             var intCodeComputer = new IntCodeComputer(codeInput);
-            return await intCodeComputer.ProcessAsync();
+            return (await intCodeComputer.ProcessAsync())[0];
         }
 
         public async override Task SolvePartTwo()
         {
-            for(var noun = 0; noun < 100; noun++)
+            var solution = await SolvePartTwoPrivateAsync();
+            Console.WriteLine($"The solution to part two is '{solution}'.");
+        }
+
+        public async Task<int> SolvePartTwoPrivateAsync()
+        {
+            for (var noun = 0; noun < 100; noun++)
             {
-                for(var verb = 0; verb < 100; verb++)
+                for (var verb = 0; verb < 100; verb++)
                 {
-                    var codeOutput = await PartOnePrivateAsync(noun, verb);
-                    if (codeOutput[0] == 19690720)
+                    var codeOutput = await SolvePartOnePrivateAsync(noun, verb);
+                    if (codeOutput == 19690720)
                     {
-                        Console.WriteLine($"The solution to part two is '{noun * 100 + verb}'.");
+                        return noun * 100 + verb;
                     }
                 }
             }
+            return 0;
         }
     }
 }
