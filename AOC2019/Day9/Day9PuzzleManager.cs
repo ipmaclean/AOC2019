@@ -5,7 +5,6 @@ namespace AOC2019.Day9
     public class Day9PuzzleManager : PuzzleManager
     {
         public Dictionary<long, long> IntCodeProgram { get; private set; }
-        //protected override string INPUT_FILE_NAME { get; set; } = "test1.txt";
 
         public Day9PuzzleManager()
         {
