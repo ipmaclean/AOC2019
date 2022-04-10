@@ -16,16 +16,16 @@
             ExternalInputs = externalInputs;
         }
 
-        public async Task<Dictionary<long, long>> ProcessAsync()
+        public async Task<Dictionary<long, long>> ProcessAsync(bool manualInputMode = false)
         {
             while ((Opcode)(_intCodeProgram[_currentPosition] % 100) != Opcode.HALT)
             {
-                await ProcessInstructionAsync();
+                await ProcessInstructionAsync(manualInputMode);
             }
             return _intCodeProgram;
         }
 
-        private async Task ProcessInstructionAsync()
+        private async Task ProcessInstructionAsync(bool manualInputMode = false)
         {
             switch ((Opcode)(_intCodeProgram[_currentPosition] % 100))
             {
@@ -36,7 +36,7 @@
                     ProcessProductInstruction();
                     break;
                 case Opcode.INPUT:
-                    await ProcessInputInstructionAsync();
+                    await ProcessInputInstructionAsync(manualInputMode);
                     break;
                 case Opcode.OUTPUT:
                     ProcessOutputInstruction();
@@ -143,23 +143,44 @@
             _currentPosition += 4;
         }
 
-        private async Task ProcessInputInstructionAsync()
+        private async Task ProcessInputInstructionAsync(bool manualInputMode = false)
         {
-            if (_inputs.Any())
+            if (manualInputMode)
             {
-                WriteParameterValue(1, _inputs.Dequeue());
+                var input = Console.ReadKey();
+                switch(input.Key)
+                {
+                    case ConsoleKey.LeftArrow:
+                        WriteParameterValue(1, -1);
+                        break;
+                    case ConsoleKey.RightArrow:
+                        WriteParameterValue(1, 1);
+                        break;
+                    case ConsoleKey.DownArrow:
+                        WriteParameterValue(1, 0);
+                        break;
+                    default:
+                        throw new ArgumentException("Input not recognised.");
+                }
             }
             else
             {
-                if (ExternalInputs == null)
+                if (_inputs.Any())
                 {
-                    throw new InvalidOperationException("No OtherIntCodeComputerOutputs defined.");
+                    WriteParameterValue(1, _inputs.Dequeue());
                 }
-                while (!ExternalInputs!.Any())
+                else
                 {
-                    await Task.Delay(5);
+                    if (ExternalInputs == null)
+                    {
+                        throw new InvalidOperationException("No OtherIntCodeComputerOutputs defined.");
+                    }
+                    while (!ExternalInputs!.Any())
+                    {
+                        await Task.Delay(5);
+                    }
+                    WriteParameterValue(1, ExternalInputs!.Dequeue());
                 }
-                WriteParameterValue(1, ExternalInputs!.Dequeue());
             }
             _currentPosition += 2;
         }
