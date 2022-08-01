@@ -42,7 +42,8 @@ namespace AOC2019.Day13
                 }
                 sb.Append(Environment.NewLine);
             }
-            Console.Clear();
+
+            Console.SetCursorPosition(0, 0);
             Console.Write(sb.ToString());
         }
 
@@ -77,6 +78,7 @@ namespace AOC2019.Day13
 
         public async Task RunPartTwo(CancellationToken cancellationToken)
         {
+            Console.Clear();
             while (!cancellationToken.IsCancellationRequested || ExternalInputs.Any())
             {
                 while (!ExternalInputs!.Any())
