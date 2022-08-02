@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using AOC2019.IntCode;
+using System.Text;
 
 namespace AOC2019.Day13
 {
@@ -7,10 +8,12 @@ namespace AOC2019.Day13
         public Dictionary<(long, long), long> Tiles { get; set; } = new Dictionary<(long, long), long>();
         public Queue<long> ExternalInputs { get; set; } = new Queue<long>();
         public Queue<long> Outputs { get; set; } = new Queue<long>();
+        private bool _intCodeComputerAwaitingInput = false;
 
-        public Screen(Queue<long> externalInputs)
+        public Screen(IntCodeComputer intCodeComputer)
         {
-            ExternalInputs = externalInputs;
+            ExternalInputs = intCodeComputer.Outputs;
+            intCodeComputer.AwaitingInput += AwaitingInputHandler;
         }
 
         private void PrintResult()
@@ -81,32 +84,33 @@ namespace AOC2019.Day13
             Console.Clear();
             while (!cancellationToken.IsCancellationRequested || ExternalInputs.Any())
             {
-                while (!ExternalInputs!.Any())
+                while (!_intCodeComputerAwaitingInput ^ cancellationToken.IsCancellationRequested)
                 {
-                    await Task.Delay(20);
-                    if (cancellationToken.IsCancellationRequested && !ExternalInputs.Any())
-                    {
-                        return;
-                    }
+                    await Task.Delay(5);
                 }
-                DrawTile();
-                if (ExternalInputs.Count == 0)
+                _intCodeComputerAwaitingInput = false;
+                while (ExternalInputs!.Any())
                 {
-                    PrintResult();
-                    var ballXCoord = Tiles.FirstOrDefault(x => x.Value == 4).Key.Item1;
-                    var paddleXCoord = Tiles.FirstOrDefault(x => x.Value == 3).Key.Item1;
-                    if (ballXCoord < paddleXCoord)
-                    {
-                        Outputs.Enqueue(-1);
-                    }
-                    else if (ballXCoord > paddleXCoord)
-                    {
-                        Outputs.Enqueue(1);
-                    }
-                    else
-                    {
-                        Outputs.Enqueue(0);
-                    }
+                    DrawTile();
+                }
+                PrintResult();
+                var ballXCoord = Tiles.FirstOrDefault(x => x.Value == 4).Key.Item1;
+                var paddleXCoord = Tiles.FirstOrDefault(x => x.Value == 3).Key.Item1;
+                if (ballXCoord < paddleXCoord)
+                {
+                    Outputs.Enqueue(-1);
+                }
+                else if (ballXCoord > paddleXCoord)
+                {
+                    Outputs.Enqueue(1);
+                }
+                else
+                {
+                    Outputs.Enqueue(0);
+                }
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    return;
                 }
             }
         }
@@ -125,6 +129,11 @@ namespace AOC2019.Day13
             {
                 Tiles.Add((xCoord, yCoord), tileId);
             }
+        }
+
+        private void AwaitingInputHandler(object? sender, EventArgs e)
+        {
+            _intCodeComputerAwaitingInput = true;
         }
     }
 }
