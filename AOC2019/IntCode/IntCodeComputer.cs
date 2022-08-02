@@ -9,6 +9,7 @@
         public Queue<long> Outputs { get; private set; } = new Queue<long>();
         public Queue<long>? ExternalInputs { get; set; }
         public event EventHandler? AwaitingInput;
+        public event EventHandler? ProgramHalted;
 
         public IntCodeComputer(Dictionary<long, long> intCodeProgram, Queue<long>? inputs = null, Queue<long>? externalInputs = null)
         {
@@ -23,6 +24,7 @@
             {
                 await ProcessInstructionAsync(manualInputMode);
             }
+            ProgramHalted?.Invoke(this, EventArgs.Empty);
             return _intCodeProgram;
         }
 

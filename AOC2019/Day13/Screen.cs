@@ -9,11 +9,13 @@ namespace AOC2019.Day13
         public Queue<long> ExternalInputs { get; set; } = new Queue<long>();
         public Queue<long> Outputs { get; set; } = new Queue<long>();
         private bool _intCodeComputerAwaitingInput = false;
+        private bool _intCodeComputerProgramHalted = false;
 
         public Screen(IntCodeComputer intCodeComputer)
         {
             ExternalInputs = intCodeComputer.Outputs;
             intCodeComputer.AwaitingInput += AwaitingInputHandler;
+            intCodeComputer.ProgramHalted += ProgramHaltedHandler;
         }
 
         private void PrintResult()
@@ -79,12 +81,12 @@ namespace AOC2019.Day13
             return Tiles.Count(x => x.Value == 2);
         }
 
-        public async Task RunPartTwo(CancellationToken cancellationToken)
+        public async Task RunPartTwo()
         {
             Console.Clear();
-            while (!cancellationToken.IsCancellationRequested || ExternalInputs.Any())
+            while (!_intCodeComputerProgramHalted || ExternalInputs.Any())
             {
-                while (!_intCodeComputerAwaitingInput ^ cancellationToken.IsCancellationRequested)
+                while (!_intCodeComputerAwaitingInput ^ _intCodeComputerProgramHalted)
                 {
                     await Task.Delay(5);
                 }
@@ -108,7 +110,7 @@ namespace AOC2019.Day13
                 {
                     Outputs.Enqueue(0);
                 }
-                if (cancellationToken.IsCancellationRequested)
+                if (_intCodeComputerProgramHalted)
                 {
                     return;
                 }
@@ -134,6 +136,11 @@ namespace AOC2019.Day13
         private void AwaitingInputHandler(object? sender, EventArgs e)
         {
             _intCodeComputerAwaitingInput = true;
+        }
+
+        private void ProgramHaltedHandler(object? sender, EventArgs e)
+        {
+            _intCodeComputerProgramHalted = true;
         }
     }
 }
