@@ -52,9 +52,8 @@ namespace AOC2019.Day13
             var screen = new Screen(intCodeComputer);
             intCodeComputer.ExternalInputs = screen.Outputs;
 
-            var screenCancellationTokenSource = new CancellationTokenSource();
             var tasks = new Task[2];
-            tasks[0] = screen.RunPartTwo(screenCancellationTokenSource.Token);
+            tasks[0] = screen.RunPartTwo();
             if (playGameInput.KeyChar == 'y')
             {
                 tasks[1] = intCodeComputer.ProcessAsync(manualInputMode: true);
@@ -64,9 +63,6 @@ namespace AOC2019.Day13
                 tasks[1] = intCodeComputer.ProcessAsync();
             }
             
-
-            await Task.WhenAny(tasks);
-            screenCancellationTokenSource.Cancel();
             await Task.WhenAll(tasks);
         }
     }
