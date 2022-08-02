@@ -8,6 +8,7 @@
         private Queue<long> _inputs;
         public Queue<long> Outputs { get; private set; } = new Queue<long>();
         public Queue<long>? ExternalInputs { get; set; }
+        public event EventHandler? AwaitingInput;
 
         public IntCodeComputer(Dictionary<long, long> intCodeProgram, Queue<long>? inputs = null, Queue<long>? externalInputs = null)
         {
@@ -147,6 +148,7 @@
         {
             if (manualInputMode)
             {
+                AwaitingInput?.Invoke(this, EventArgs.Empty);
                 var input = Console.ReadKey();
                 switch(input.Key)
                 {
@@ -174,6 +176,10 @@
                     if (ExternalInputs == null)
                     {
                         throw new InvalidOperationException("No OtherIntCodeComputerOutputs defined.");
+                    }
+                    if (!ExternalInputs!.Any())
+                    {
+                        AwaitingInput?.Invoke(this, EventArgs.Empty);
                     }
                     while (!ExternalInputs!.Any())
                     {

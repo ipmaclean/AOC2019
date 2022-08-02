@@ -34,7 +34,7 @@ namespace AOC2019.Day13
         public async Task<long> SolvePartOnePrivateAsync()
         {
             var intCodeComputer = new IntCodeComputer(IntCodeProgram);
-            var screen = new Screen(intCodeComputer.Outputs);
+            var screen = new Screen(intCodeComputer);
 
             await intCodeComputer.ProcessAsync();
             return screen.RunPartOne();
@@ -49,7 +49,7 @@ namespace AOC2019.Day13
             var codeInput = new Dictionary<long, long>(IntCodeProgram);
             codeInput[0] = 2;
             var intCodeComputer = new IntCodeComputer(codeInput);
-            var screen = new Screen(intCodeComputer.Outputs);
+            var screen = new Screen(intCodeComputer);
             intCodeComputer.ExternalInputs = screen.Outputs;
 
             var screenCancellationTokenSource = new CancellationTokenSource();
