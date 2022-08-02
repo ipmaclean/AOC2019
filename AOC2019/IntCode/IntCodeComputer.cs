@@ -6,16 +6,24 @@
         private long _relativeBase = 0;
         private Dictionary<long, long> _intCodeProgram;
         private Queue<long> _inputs;
+
         public Queue<long> Outputs { get; private set; } = new Queue<long>();
         public Queue<long>? ExternalInputs { get; set; }
+        public CancellationToken CancellationToken { get; set; }
+
         public event EventHandler? AwaitingInput;
         public event EventHandler? ProgramHalted;
 
-        public IntCodeComputer(Dictionary<long, long> intCodeProgram, Queue<long>? inputs = null, Queue<long>? externalInputs = null)
+        public IntCodeComputer(
+            Dictionary<long, long> intCodeProgram,
+            Queue<long>? inputs = null,
+            Queue<long>? externalInputs = null,
+            CancellationToken? cancellationToken = null)
         {
             _intCodeProgram = intCodeProgram;
             _inputs = inputs ?? new Queue<long>();
             ExternalInputs = externalInputs;
+            CancellationToken = cancellationToken ?? new CancellationTokenSource().Token;
         }
 
         public async Task<Dictionary<long, long>> ProcessAsync(bool manualInputMode = false)
@@ -186,6 +194,11 @@
                     while (!ExternalInputs!.Any())
                     {
                         await Task.Delay(5);
+                        if (CancellationToken.IsCancellationRequested)
+                        {
+                            _intCodeProgram[_currentPosition] = (long)Opcode.HALT;
+                            return;
+                        }
                     }
                     WriteParameterValue(1, ExternalInputs!.Dequeue());
                 }

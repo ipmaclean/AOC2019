@@ -68,7 +68,6 @@ namespace AOC2019.Day13
                     return 'o';
                 default:
                     throw new ArgumentException("Did not recognise tile id.");
-
             }
         }
 
