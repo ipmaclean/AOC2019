@@ -2,7 +2,7 @@
 
 namespace AOC2019.Day17
 {
-    internal class Day17PuzzleManager : PuzzleManager
+    public class Day17PuzzleManager : PuzzleManager
     {
         private const int CHARACTERS_IN_VIDEO_FEED = 2347;
 
@@ -27,8 +27,14 @@ namespace AOC2019.Day17
         {
             Console.WriteLine("Would you like to see the video feed? (y/n)");
             var videoFeedInput = Console.ReadKey();
+            var showVideoFeedInput = videoFeedInput.KeyChar == 'y';
             Console.WriteLine("");
+            var solution = await SolvePartOnePrivateAsync(showVideoFeedInput);
+            Console.WriteLine($"The solution to part one is '{solution}'.");
+        }
 
+        public async Task<int> SolvePartOnePrivateAsync(bool showVideoFeedInput)
+        {
             var codeInput = new Dictionary<long, long>(IntCodeProgram);
             var intCodeComputer = new IntCodeComputer(codeInput);
             await intCodeComputer.ProcessAsync();
@@ -36,7 +42,7 @@ namespace AOC2019.Day17
             var mapAsCharacters = asciiHelper.CharListAscii(intCodeComputer.Outputs);
             var solution = GetIntersectionValues(mapAsCharacters);
 
-            if (videoFeedInput.KeyChar == 'y')
+            if (showVideoFeedInput)
             {
                 codeInput = new Dictionary<long, long>(IntCodeProgram);
                 intCodeComputer = new IntCodeComputer(codeInput);
@@ -44,8 +50,7 @@ namespace AOC2019.Day17
                 Console.Clear();
                 asciiHelper.PrintAscii(intCodeComputer.Outputs);
             }
-
-            Console.WriteLine($"The solution to part one is '{solution}'.");
+            return solution;
         }
 
         private int GetIntersectionValues(List<List<char>> mapAsCharacters)

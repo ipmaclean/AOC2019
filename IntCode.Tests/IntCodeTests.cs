@@ -3,6 +3,7 @@ using AOC2019.Day2;
 using AOC2019.Day5;
 using AOC2019.Day7;
 using AOC2019.Day9;
+using AOC2019.Day17;
 using Xunit;
 
 namespace IntCode.Tests
@@ -81,6 +82,14 @@ namespace IntCode.Tests
             var day13PuzzleManager = new Day13PuzzleManager();
 
             Assert.Equal(291, await day13PuzzleManager.SolvePartOnePrivateAsync());
+        }
+
+        [Fact]
+        public async void Day17_Part1_ShouldBeCorrect()
+        {
+            var day17PuzzleManager = new Day17PuzzleManager();
+
+            Assert.Equal(14332, await day17PuzzleManager.SolvePartOnePrivateAsync(false));
         }
     }
 }
