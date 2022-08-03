@@ -260,7 +260,7 @@ namespace AOC2019.Day15
             }
 
             var sb = new StringBuilder();
-            for (var j = 0; j <= highestY - lowestY; j++)
+            for (var j = highestY - lowestY; j >= 0; j--)
             {
                 for (var i = 0; i <= highestX - lowestX; i++)
                 {
