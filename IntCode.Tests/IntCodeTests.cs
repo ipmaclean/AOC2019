@@ -100,5 +100,13 @@ namespace IntCode.Tests
 
             Assert.Equal(197, await day19PuzzleManager.SolvePartOnePrivateAsync(false));
         }
+
+        [Fact]
+        public async void Day19_Part2_ShouldBeCorrect()
+        {
+            var day19PuzzleManager = new Day19PuzzleManager();
+
+            Assert.Equal(9181022, await day19PuzzleManager.SolvePartTwoPrivateAsync());
+        }
     }
 }
