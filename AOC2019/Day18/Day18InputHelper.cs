@@ -14,6 +14,8 @@
             var keys = "abcdefghijklmnopqrstuvwxyz";
             var doors = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
             var xCoord = 0;
+            var startTileCounter = 0;
+            var startTiles = new char[] { '@', '<', '>', '^' };
             while ((ln = sr.ReadLine()!) != null)
             {
                 var yCoord = 0;
@@ -23,9 +25,9 @@
                     {
                         output.Add(new Tile((xCoord, yCoord), character, isKey: false, isDoor: false, isStartingPosition: false));
                     }
-                    else if (character == '@' || character == '<' || character == '>' || character == '^')
+                    else if (character == '@')
                     {
-                        output.Add(new Tile((xCoord, yCoord), character, isKey: false, isDoor: false, isStartingPosition: true));
+                        output.Add(new Tile((xCoord, yCoord), startTiles[startTileCounter++], isKey: false, isDoor: false, isStartingPosition: true));
                     }
                     else if (keys.Contains(character))
                     {

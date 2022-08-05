@@ -1,15 +1,12 @@
-﻿using System.Diagnostics;
-
-namespace AOC2019.Day18
+﻿namespace AOC2019.Day18
 {
     internal class Day18PuzzleManager : PuzzleManager
     {
 
         public List<Tile> TilesPartOne { get; set; }
         public List<Tile> TilesPartTwo { get; set; }
-        protected override string INPUT_FILE_NAME { get; set; } = "test4Part1.txt";
-        private const string INPUT_FILE_NAME_PART_TWO = "test1Part2.txt";
 
+        private const string INPUT_FILE_NAME_PART_TWO = "inputPart2.txt";
         private readonly Dictionary<char, char> _doorToKeyMap = new Dictionary<char, char>
         {
             { 'A', 'a' },
@@ -39,22 +36,46 @@ namespace AOC2019.Day18
             { 'Y', 'y' },
             { 'Z', 'z' }
         };
-
         private HashSet<ShortestPath> _shortestPathsPartOne = new HashSet<ShortestPath>();
-
         private HashSet<ShortestPath> _shortestPathsPartTwo = new HashSet<ShortestPath>();
 
         public Day18PuzzleManager()
         {
             var inputHelper = new Day18InputHelper(INPUT_FILE_NAME);
             TilesPartOne = inputHelper.Parse();
-            _shortestPathsPartOne = FindShortestPaths(TilesPartOne);
 
             inputHelper = new Day18InputHelper(INPUT_FILE_NAME_PART_TWO);
             TilesPartTwo = inputHelper.Parse();
-            _shortestPathsPartTwo = FindShortestPaths(TilesPartTwo, isPartTwo: true);
         }
 
+        public override Task SolveBothParts()
+        {
+            SolvePartOne();
+            SolvePartTwo();
+            return Task.CompletedTask;
+        }
+
+        public override Task SolvePartOne()
+        {
+            if (_shortestPathsPartOne.Count == 0)
+            {
+                _shortestPathsPartOne = FindShortestPaths(TilesPartOne);
+            }
+            var solution = FindShortestNumberOfStepsToFindAllKeys(TilesPartOne, _shortestPathsPartOne);
+            Console.WriteLine($"The solution to part one is '{solution}'.");
+            return Task.CompletedTask;
+        }
+
+        public override Task SolvePartTwo()
+        {
+            if (_shortestPathsPartTwo.Count == 0)
+            {
+                _shortestPathsPartTwo = FindShortestPaths(TilesPartTwo, isPartTwo: true);
+            }
+            var solution = FindShortestNumberOfStepsToFindAllKeys(TilesPartTwo, _shortestPathsPartTwo, isPartTwo: true);
+            Console.WriteLine($"The solution to part one is '{solution}'.");
+            return Task.CompletedTask;
+        }
 
         private HashSet<ShortestPath> FindShortestPaths(List<Tile> allTiles, bool isPartTwo = false)
         {
@@ -123,27 +144,19 @@ namespace AOC2019.Day18
             ) && !step.TilesVisited.Contains(x));
         }
 
-        public override Task SolveBothParts()
+        private int FindShortestNumberOfStepsToFindAllKeys(List<Tile> allTiles, HashSet<ShortestPath> shortestPaths, bool isPartTwo = false)
         {
-            SolvePartOne();
-            SolvePartTwo();
-            return Task.CompletedTask;
-        }
-
-        public override Task SolvePartOne()
-        {
-            var solution = FindShortestNumberOfStepsToFindAllKeysPartOne();
-            Console.WriteLine($"The solution to part one is '{solution}'.");
-            return Task.CompletedTask;
-        }
-
-        private int FindShortestNumberOfStepsToFindAllKeysPartOne()
-        {
-            var totalNumberOfKeys = TilesPartOne.Count(x => x.IsKey);
-            var startTile = TilesPartOne.First(x => x.IsStartingPosition);
+            var totalNumberOfKeys = allTiles.Count(x => x.IsKey);
+            var startTile = allTiles.First(x => x.IsStartingPosition);
 
             var allStates = new Queue<Day18SearchState>();
-            allStates.Enqueue(new Day18SearchState(new HashSet<char>() { '@' }, new HashSet<char>(), 0));
+
+            var startingPositions = new HashSet<char>() { '@' };
+            if (isPartTwo)
+            {
+                startingPositions = new HashSet<char>() { '@', '<', '>', '^' };
+            }
+            allStates.Enqueue(new Day18SearchState(startingPositions, new HashSet<char>(), 0));
             var minStepsForKeysFoundAtFinalPosition = new Dictionary<(string, string), int>();
             var minSteps = int.MaxValue;
             while (allStates.Count > 0)
@@ -152,17 +165,19 @@ namespace AOC2019.Day18
                 if (currentState.KeysCollected.Count > 1)
                 {
                     var keysCollectedString = ConvertHashSetToOrderedString(currentState.KeysCollected);
-                    if (minStepsForKeysFoundAtFinalPosition.ContainsKey((keysCollectedString, ConvertHashSetToOrderedString(currentState.CurrentLocations))))
+                    var currentLocationsString = ConvertHashSetToOrderedString(currentState.CurrentLocations);
+                    if (minStepsForKeysFoundAtFinalPosition.ContainsKey((keysCollectedString, currentLocationsString)))
                     {
-                        if (minStepsForKeysFoundAtFinalPosition[(keysCollectedString, ConvertHashSetToOrderedString(currentState.CurrentLocations))] <= currentState.Distance)
+                        if (minStepsForKeysFoundAtFinalPosition[(keysCollectedString, currentLocationsString)] <= currentState.Distance)
                         {
+                            // If this exact state has already been reached more efficiently then discard the current state
                             continue;
                         }
-                        minStepsForKeysFoundAtFinalPosition[(keysCollectedString, ConvertHashSetToOrderedString(currentState.CurrentLocations))] = currentState.Distance;
+                        minStepsForKeysFoundAtFinalPosition[(keysCollectedString, currentLocationsString)] = currentState.Distance;
                     }
                     else
                     {
-                        minStepsForKeysFoundAtFinalPosition.Add((keysCollectedString, ConvertHashSetToOrderedString(currentState.CurrentLocations)), currentState.Distance);
+                        minStepsForKeysFoundAtFinalPosition.Add((keysCollectedString, currentLocationsString), currentState.Distance);
                     }
                 }
                 if (currentState.KeysCollected.Count == totalNumberOfKeys)
@@ -172,7 +187,7 @@ namespace AOC2019.Day18
                 }
                 foreach (var currentLocation in currentState.CurrentLocations)
                 {
-                    foreach (var shortestPath in FindReachableUnownedKeys(currentLocation, currentState.KeysCollected, _shortestPathsPartOne))
+                    foreach (var shortestPath in FindReachableUnownedKeys(currentLocation, currentState.KeysCollected, shortestPaths))
                     {
                         var destination = shortestPath.TilesBetween.First(x => x != currentLocation);
                         var stateToQueueCurrentLocations = new HashSet<char>(currentState.CurrentLocations);
@@ -214,8 +229,8 @@ namespace AOC2019.Day18
             {
                 keysHeldExceptForCurrentPosition.Add('^');
             }
-            // contains start
-            // does not contain any member of keysHeld except for currentPosition and start
+            // Contains the startingPosition
+            // Does not contain any member of keysHeld except for currentPosition and startingPosition
             // doorsBetween must be a subset of keysHeld
             return shortestPaths.Where(x =>
                 x.TilesBetween.Contains(currentPosition) &&
@@ -227,18 +242,6 @@ namespace AOC2019.Day18
         private string ConvertHashSetToOrderedString(HashSet<char> hashSet)
         {
             return new string(hashSet.OrderBy(x => x).ToArray());
-        }
-
-        public override Task SolvePartTwo()
-        {
-            var solution = FindShortestNumberOfStepsToFindAllKeysPartTwo();
-            Console.WriteLine($"The solution to part one is '{solution}'.");
-            return Task.CompletedTask;
-        }
-
-        private int FindShortestNumberOfStepsToFindAllKeysPartTwo()
-        {
-            return 0;
         }
     }
 }
