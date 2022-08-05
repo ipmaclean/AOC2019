@@ -2,13 +2,13 @@
 {
     internal class Day18SearchState
     {
-        public char CurrentLocation { get; set; }
+        public HashSet<char> CurrentLocations { get; set; }
         public HashSet<char> KeysCollected { get; set; }
         public int Distance { get; set; }
 
-        public Day18SearchState(char currentLocation, HashSet<char> keysCollected, int distance)
+        public Day18SearchState(HashSet<char> currentLocations, HashSet<char> keysCollected, int distance)
         {
-            CurrentLocation = currentLocation;
+            CurrentLocations = new HashSet<char>(currentLocations);
             KeysCollected = new HashSet<char>(keysCollected);
             Distance = distance;
         }

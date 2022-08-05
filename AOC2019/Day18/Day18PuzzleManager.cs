@@ -132,37 +132,37 @@ namespace AOC2019.Day18
 
         public override Task SolvePartOne()
         {
-            var solution = FindShortestNumberOfStepsToFindAllKeysPart1();
+            var solution = FindShortestNumberOfStepsToFindAllKeysPartOne();
             Console.WriteLine($"The solution to part one is '{solution}'.");
             return Task.CompletedTask;
         }
 
-        private int FindShortestNumberOfStepsToFindAllKeysPart1()
+        private int FindShortestNumberOfStepsToFindAllKeysPartOne()
         {
             var totalNumberOfKeys = TilesPartOne.Count(x => x.IsKey);
             var startTile = TilesPartOne.First(x => x.IsStartingPosition);
 
             var allStates = new Queue<Day18SearchState>();
-            allStates.Enqueue(new Day18SearchState('@', new HashSet<char>(), 0));
-            var minStepsForKeysFoundAtFinalPosition = new Dictionary<(string, char), int>();
+            allStates.Enqueue(new Day18SearchState(new HashSet<char>() { '@' }, new HashSet<char>(), 0));
+            var minStepsForKeysFoundAtFinalPosition = new Dictionary<(string, string), int>();
             var minSteps = int.MaxValue;
             while (allStates.Count > 0)
             {
                 var currentState = allStates.Dequeue();
                 if (currentState.KeysCollected.Count > 1)
                 {
-                    var keysCollectedString = ConvertKeysHeldToString(currentState.KeysCollected);
-                    if (minStepsForKeysFoundAtFinalPosition.ContainsKey((keysCollectedString, currentState.CurrentLocation)))
+                    var keysCollectedString = ConvertHashSetToOrderedString(currentState.KeysCollected);
+                    if (minStepsForKeysFoundAtFinalPosition.ContainsKey((keysCollectedString, ConvertHashSetToOrderedString(currentState.CurrentLocations))))
                     {
-                        if (minStepsForKeysFoundAtFinalPosition[(keysCollectedString, currentState.CurrentLocation)] <= currentState.Distance)
+                        if (minStepsForKeysFoundAtFinalPosition[(keysCollectedString, ConvertHashSetToOrderedString(currentState.CurrentLocations))] <= currentState.Distance)
                         {
                             continue;
                         }
-                        minStepsForKeysFoundAtFinalPosition[(keysCollectedString, currentState.CurrentLocation)] = currentState.Distance;
+                        minStepsForKeysFoundAtFinalPosition[(keysCollectedString, ConvertHashSetToOrderedString(currentState.CurrentLocations))] = currentState.Distance;
                     }
                     else
                     {
-                        minStepsForKeysFoundAtFinalPosition.Add((keysCollectedString, currentState.CurrentLocation), currentState.Distance);
+                        minStepsForKeysFoundAtFinalPosition.Add((keysCollectedString, ConvertHashSetToOrderedString(currentState.CurrentLocations)), currentState.Distance);
                     }
                 }
                 if (currentState.KeysCollected.Count == totalNumberOfKeys)
@@ -170,20 +170,25 @@ namespace AOC2019.Day18
                     minSteps = Math.Min(minSteps, currentState.Distance);
                     continue;
                 }
-
-                foreach (var shortestPath in FindReachableUnownedKeys(currentState.CurrentLocation, currentState.KeysCollected, _shortestPathsPartOne))
+                foreach (var currentLocation in currentState.CurrentLocations)
                 {
-                    var destination = shortestPath.TilesBetween.First(x => x != currentState.CurrentLocation);
-                    var stateToQueue = new Day18SearchState(destination, currentState.KeysCollected, currentState.Distance + shortestPath.Distance);
-                    foreach (var key in shortestPath.KeysBetween)
+                    foreach (var shortestPath in FindReachableUnownedKeys(currentLocation, currentState.KeysCollected, _shortestPathsPartOne))
                     {
-                        if (!stateToQueue.KeysCollected.Contains(key))
+                        var destination = shortestPath.TilesBetween.First(x => x != currentLocation);
+                        var stateToQueueCurrentLocations = new HashSet<char>(currentState.CurrentLocations);
+                        stateToQueueCurrentLocations.Remove(currentLocation);
+                        stateToQueueCurrentLocations.Add(destination);
+                        var stateToQueue = new Day18SearchState(stateToQueueCurrentLocations, currentState.KeysCollected, currentState.Distance + shortestPath.Distance);
+                        foreach (var key in shortestPath.KeysBetween)
                         {
-                            stateToQueue.KeysCollected.Add(key);
+                            if (!stateToQueue.KeysCollected.Contains(key))
+                            {
+                                stateToQueue.KeysCollected.Add(key);
+                            }
                         }
+                        stateToQueue.KeysCollected.Add(destination);
+                        allStates.Enqueue(stateToQueue);
                     }
-                    stateToQueue.KeysCollected.Add(destination);
-                    allStates.Enqueue(stateToQueue);
                 }
             }
             return minSteps;
@@ -219,14 +224,21 @@ namespace AOC2019.Day18
                 .ToHashSet();
         }
 
-        private string ConvertKeysHeldToString(HashSet<char> keysHeld)
+        private string ConvertHashSetToOrderedString(HashSet<char> hashSet)
         {
-            return new string(keysHeld.OrderBy(x => x).ToArray());
+            return new string(hashSet.OrderBy(x => x).ToArray());
         }
 
         public override Task SolvePartTwo()
         {
+            var solution = FindShortestNumberOfStepsToFindAllKeysPartTwo();
+            Console.WriteLine($"The solution to part one is '{solution}'.");
             return Task.CompletedTask;
+        }
+
+        private int FindShortestNumberOfStepsToFindAllKeysPartTwo()
+        {
+            return 0;
         }
     }
 }
