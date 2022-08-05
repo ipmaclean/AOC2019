@@ -5,8 +5,10 @@ namespace AOC2019.Day18
     internal class Day18PuzzleManager : PuzzleManager
     {
 
-        public List<Tile> Tiles { get; set; }
-        //protected override string INPUT_FILE_NAME { get; set; } = "test5.txt";
+        public List<Tile> TilesPartOne { get; set; }
+        public List<Tile> TilesPartTwo { get; set; }
+        protected override string INPUT_FILE_NAME { get; set; } = "test4Part1.txt";
+        private const string INPUT_FILE_NAME_PART_TWO = "test1Part2.txt";
 
         private readonly Dictionary<char, char> _doorToKeyMap = new Dictionary<char, char>
         {
@@ -38,120 +40,82 @@ namespace AOC2019.Day18
             { 'Z', 'z' }
         };
 
-        private HashSet<ShortestPath> _shortestPaths;
+        private HashSet<ShortestPath> _shortestPathsPartOne = new HashSet<ShortestPath>();
+
+        private HashSet<ShortestPath> _shortestPathsPartTwo = new HashSet<ShortestPath>();
 
         public Day18PuzzleManager()
         {
             var inputHelper = new Day18InputHelper(INPUT_FILE_NAME);
-            Tiles = inputHelper.Parse();
-            _shortestPaths = FindShortestPaths();
+            TilesPartOne = inputHelper.Parse();
+            _shortestPathsPartOne = FindShortestPaths(TilesPartOne);
+
+            inputHelper = new Day18InputHelper(INPUT_FILE_NAME_PART_TWO);
+            TilesPartTwo = inputHelper.Parse();
+            _shortestPathsPartTwo = FindShortestPaths(TilesPartTwo, isPartTwo: true);
         }
 
-        //private HashSet<ShortestPath> FindShortestPaths()
-        //{
-        //    var shortestPaths = new HashSet<ShortestPath>();
 
-        //    var keysAndStartingPositions = new List<char>() { '@' };
-        //    keysAndStartingPositions.AddRange(Tiles.Where(x => x.IsKey).Select(x => x.Value));
-
-        //    for (var i = 0; i < keysAndStartingPositions.Count - 1; i++)
-        //    {
-        //        for (var j = i + 1; j < keysAndStartingPositions.Count; j++)
-        //        {
-        //            (var distance, var doorsBetween, var keysBetween) = GetShortestDistanceDoorsBetweenAndKeysBetween(keysAndStartingPositions[i], keysAndStartingPositions[j]);
-        //            var shortestPath = new ShortestPath(new HashSet<char>() { keysAndStartingPositions[i], keysAndStartingPositions[j] }, doorsBetween, keysBetween, distance);
-        //            shortestPaths.Add(shortestPath);
-        //        }
-        //    }
-        //    return shortestPaths;
-        //}
-
-        // This is taking ages! I could do a BFS for each key/start and then fill in the shortest paths as they're found?
-        private (int distance, HashSet<char> doorsBetween, HashSet<char> keysBetween) GetShortestDistanceDoorsBetweenAndKeysBetween(char tile1, char tile2)
-        {
-            var startTile = Tiles.First(x => x.Value == tile1);
-            var allStates = new Queue<Day18BreadthFirstSearchState>();
-            allStates.Enqueue(new Day18BreadthFirstSearchState(0, startTile, new HashSet<Tile>() { startTile }));
-            while (allStates.Count > 0)
-            {
-                var currentState = allStates.Dequeue();
-
-                foreach (var unexploredNeighbour in FindUnexploredNeighbours(currentState))
-                {
-                    if (unexploredNeighbour.Value == tile2)
-                    {
-                        return (currentState.Steps + 1, currentState.DoorsBetween, currentState.KeysBetween);
-                    }
-                    var stateToQueue = new Day18BreadthFirstSearchState(currentState.Steps + 1, unexploredNeighbour, currentState.TilesVisited, currentState.DoorsBetween, currentState.KeysBetween);
-
-                    if (unexploredNeighbour.IsDoor && !stateToQueue.DoorsBetween.Contains(unexploredNeighbour.Value))
-                    {
-                        stateToQueue.DoorsBetween.Add(unexploredNeighbour.Value);
-                    }
-                    if (unexploredNeighbour.IsKey && !stateToQueue.KeysBetween.Contains(unexploredNeighbour.Value))
-                    {
-                        stateToQueue.KeysBetween.Add(unexploredNeighbour.Value);
-                    }
-                    stateToQueue.TilesVisited.Add(unexploredNeighbour);
-                    allStates.Enqueue(stateToQueue);
-                }
-            }
-            throw new Exception($"Shortest path between '{tile1}' and '{tile2}' could not be found.");
-        }
-
-        private HashSet<ShortestPath> FindShortestPaths()
+        private HashSet<ShortestPath> FindShortestPaths(List<Tile> allTiles, bool isPartTwo = false)
         {
             var shortestPaths = new HashSet<ShortestPath>();
 
             var keysAndStartingPositions = new List<char>() { '@' };
-            keysAndStartingPositions.AddRange(Tiles.Where(x => x.IsKey).Select(x => x.Value));
+            if (isPartTwo)
+            {
+                keysAndStartingPositions.AddRange(new List<char>() { '<', '>', '^' });
+            }
+            keysAndStartingPositions.AddRange(allTiles.Where(x => x.IsKey).Select(x => x.Value));
 
             foreach (var tile in keysAndStartingPositions)
             {
-                GetAllShortestPathsFromStartingTile(tile, shortestPaths, keysAndStartingPositions.Count);
+                GetAllShortestPathsFromStartingTile(tile, shortestPaths, keysAndStartingPositions.Count, allTiles);
             }
             return shortestPaths;
         }
 
-        private void GetAllShortestPathsFromStartingTile(char tile, HashSet<ShortestPath> shortestPaths, int totalNumberOfStartingPositions)
+        private void GetAllShortestPathsFromStartingTile(char tile, HashSet<ShortestPath> shortestPaths, int totalNumberOfStartingPositions, List<Tile> allTiles)
         {
-            var startTile = Tiles.First(x => x.Value == tile);
-            var allStates = new Queue<Day18BreadthFirstSearchState>();
-            allStates.Enqueue(new Day18BreadthFirstSearchState(0, startTile, new HashSet<Tile>() { startTile }));
-            while (allStates.Count > 0)
+            var startTiles = allTiles.Where(x => x.Value == tile);
+            foreach (var startTile in startTiles)
             {
-                if (shortestPaths.Where(x => x.TilesBetween.Contains(tile)).Count() >= totalNumberOfStartingPositions)
+                var allStates = new Queue<Day18BreadthFirstSearchState>();
+                allStates.Enqueue(new Day18BreadthFirstSearchState(0, startTile, new HashSet<Tile>() { startTile }));
+                while (allStates.Count > 0)
                 {
-                    return;
-                }
-                var currentState = allStates.Dequeue();
+                    if (shortestPaths.Where(x => x.TilesBetween.Contains(tile)).Count() >= totalNumberOfStartingPositions)
+                    {
+                        return;
+                    }
+                    var currentState = allStates.Dequeue();
 
-                foreach (var unexploredNeighbour in FindUnexploredNeighbours(currentState))
-                {
-                    if (unexploredNeighbour.IsKey && unexploredNeighbour.Value != tile && !shortestPaths.Any(x => x.TilesBetween.Contains(tile) && x.TilesBetween.Contains(unexploredNeighbour.Value)))
+                    foreach (var unexploredNeighbour in FindUnexploredNeighbours(currentState, allTiles))
                     {
-                        var shortestPath = new ShortestPath(new HashSet<char>() { tile, unexploredNeighbour.Value }, currentState.DoorsBetween, currentState.KeysBetween, currentState.Steps + 1);
-                        shortestPaths.Add(shortestPath);
-                    }
-                    var stateToQueue = new Day18BreadthFirstSearchState(currentState.Steps + 1, unexploredNeighbour, currentState.TilesVisited, currentState.DoorsBetween, currentState.KeysBetween);
+                        if (unexploredNeighbour.IsKey && unexploredNeighbour.Value != tile && !shortestPaths.Any(x => x.TilesBetween.Contains(tile) && x.TilesBetween.Contains(unexploredNeighbour.Value)))
+                        {
+                            var shortestPath = new ShortestPath(new HashSet<char>() { tile, unexploredNeighbour.Value }, currentState.DoorsBetween, currentState.KeysBetween, currentState.Steps + 1);
+                            shortestPaths.Add(shortestPath);
+                        }
+                        var stateToQueue = new Day18BreadthFirstSearchState(currentState.Steps + 1, unexploredNeighbour, currentState.TilesVisited, currentState.DoorsBetween, currentState.KeysBetween);
 
-                    if (unexploredNeighbour.IsDoor && !stateToQueue.DoorsBetween.Contains(unexploredNeighbour.Value))
-                    {
-                        stateToQueue.DoorsBetween.Add(unexploredNeighbour.Value);
+                        if (unexploredNeighbour.IsDoor && !stateToQueue.DoorsBetween.Contains(unexploredNeighbour.Value))
+                        {
+                            stateToQueue.DoorsBetween.Add(unexploredNeighbour.Value);
+                        }
+                        if (unexploredNeighbour.IsKey && !stateToQueue.KeysBetween.Contains(unexploredNeighbour.Value))
+                        {
+                            stateToQueue.KeysBetween.Add(unexploredNeighbour.Value);
+                        }
+                        stateToQueue.TilesVisited.Add(unexploredNeighbour);
+                        allStates.Enqueue(stateToQueue);
                     }
-                    if (unexploredNeighbour.IsKey && !stateToQueue.KeysBetween.Contains(unexploredNeighbour.Value))
-                    {
-                        stateToQueue.KeysBetween.Add(unexploredNeighbour.Value);
-                    }
-                    stateToQueue.TilesVisited.Add(unexploredNeighbour);
-                    allStates.Enqueue(stateToQueue);
                 }
             }
         }
 
-        private IEnumerable<Tile> FindUnexploredNeighbours(Day18BreadthFirstSearchState step)
+        private IEnumerable<Tile> FindUnexploredNeighbours(Day18BreadthFirstSearchState step, List<Tile> allTiles)
         {
-            return Tiles.Where(x => (
+            return allTiles.Where(x => (
             x.Coordinates == (step.CurrentTile.Coordinates.Item1, step.CurrentTile.Coordinates.Item2 + 1) ||
             x.Coordinates == (step.CurrentTile.Coordinates.Item1, step.CurrentTile.Coordinates.Item2 - 1) ||
             x.Coordinates == (step.CurrentTile.Coordinates.Item1 + 1, step.CurrentTile.Coordinates.Item2) ||
@@ -168,19 +132,15 @@ namespace AOC2019.Day18
 
         public override Task SolvePartOne()
         {
-            var stopwatch = new Stopwatch();
-            stopwatch.Start();
-
-            var solution = FindShortestNumberOfStepsToFindAllKeys();
+            var solution = FindShortestNumberOfStepsToFindAllKeysPart1();
             Console.WriteLine($"The solution to part one is '{solution}'.");
-            stopwatch.Stop();
             return Task.CompletedTask;
         }
 
-        private int FindShortestNumberOfStepsToFindAllKeys()
+        private int FindShortestNumberOfStepsToFindAllKeysPart1()
         {
-            var totalNumberOfKeys = Tiles.Count(x => x.IsKey);
-            var startTile = Tiles.First(x => x.IsStartingPosition);
+            var totalNumberOfKeys = TilesPartOne.Count(x => x.IsKey);
+            var startTile = TilesPartOne.First(x => x.IsStartingPosition);
 
             var allStates = new Queue<Day18SearchState>();
             allStates.Enqueue(new Day18SearchState('@', new HashSet<char>(), 0));
@@ -211,7 +171,7 @@ namespace AOC2019.Day18
                     continue;
                 }
 
-                foreach (var shortestPath in FindReachableUnownedKeys(currentState.CurrentLocation, currentState.KeysCollected))
+                foreach (var shortestPath in FindReachableUnownedKeys(currentState.CurrentLocation, currentState.KeysCollected, _shortestPathsPartOne))
                 {
                     var destination = shortestPath.TilesBetween.First(x => x != currentState.CurrentLocation);
                     var stateToQueue = new Day18SearchState(destination, currentState.KeysCollected, currentState.Distance + shortestPath.Distance);
@@ -229,61 +189,7 @@ namespace AOC2019.Day18
             return minSteps;
         }
 
-        //private int FindShortestNumberOfStepsToFindAllKeys()
-        //{
-        //    var totalNumberOfKeys = Tiles.Count(x => x.IsKey);
-        //    var startTile = Tiles.First(x => x.IsStartingPosition);
-
-        //    var allStates = new HashSet<Day18SearchState>();
-        //    allStates.Add(new Day18SearchState('@', new HashSet<char>(), 0));
-        //    while (allStates.Count > 0)
-        //    {
-        //        var currentState = allStates.MinBy(x => x.Distance);
-        //        if (currentState!.KeysCollected.Count == totalNumberOfKeys)
-        //        {
-        //            return currentState.Distance;
-        //        }
-        //        allStates.Remove(currentState!);
-
-        //        foreach (var shortestPath in FindReachableUnownedKeys(currentState!.CurrentLocation, currentState.KeysCollected))
-        //        {
-        //            var destination = shortestPath.TilesBetween.First(x => x != currentState.CurrentLocation);
-        //            var stateToQueue = new Day18SearchState(destination, currentState.KeysCollected, currentState.Distance + shortestPath.Distance);
-        //            stateToQueue.KeysCollected.Add(destination);
-        //            allStates.Add(stateToQueue);
-        //        }
-        //    }
-        //    throw new Exception($"Shortest path could not be found.");
-        //}
-
-        //private int FindShortestNumberOfStepsToFindAllKeys()
-        //{
-        //    var startAndKeys = Tiles.Where(x => x.IsStartingPosition || x.IsKey).ToHashSet();
-        //    var currentTile = Tiles.First(x => x.IsStartingPosition);
-        //    currentTile.TentativeDistance = 0;
-        //    var keysHeld = new HashSet<char>();
-
-        //    while (startAndKeys.Any(x => !x.IsVisited))
-        //    {
-        //        currentTile = startAndKeys.Where(x => !x.IsVisited).MinBy(x => x.TentativeDistance);
-        //        if (currentTile!.IsKey)
-        //        {
-        //            keysHeld.Add(currentTile.Value);
-        //        }
-
-        //        foreach (var shortestPath in FindReachableUnownedKeys(currentTile!.Value, keysHeld))
-        //        {
-        //            var destination = shortestPath.TilesBetween.First(x => x != currentTile.Value);
-        //            var destinationTile = startAndKeys.First(x => x.Value == destination);
-        //            destinationTile.TentativeDistance = Math.Min(destinationTile.TentativeDistance, currentTile.TentativeDistance + shortestPath.Distance);
-        //        }
-        //        currentTile.IsVisited = true;
-
-        //    }
-        //    return startAndKeys.Max(x => x.TentativeDistance);
-        //}
-
-        private HashSet<ShortestPath> FindReachableUnownedKeys(char currentPosition, HashSet<char> keysHeld)
+        private HashSet<ShortestPath> FindReachableUnownedKeys(char currentPosition, HashSet<char> keysHeld, HashSet<ShortestPath> shortestPaths)
         {
             var keysHeldExceptForCurrentPosition = new HashSet<char>(keysHeld);
             keysHeldExceptForCurrentPosition.Remove(currentPosition);
@@ -291,16 +197,27 @@ namespace AOC2019.Day18
             {
                 keysHeldExceptForCurrentPosition.Add('@');
             }
+            if (currentPosition != '<')
+            {
+                keysHeldExceptForCurrentPosition.Add('<');
+            }
+            if (currentPosition != '>')
+            {
+                keysHeldExceptForCurrentPosition.Add('>');
+            }
+            if (currentPosition != '^')
+            {
+                keysHeldExceptForCurrentPosition.Add('^');
+            }
             // contains start
             // does not contain any member of keysHeld except for currentPosition and start
             // doorsBetween must be a subset of keysHeld
-            return _shortestPaths.Where(x =>
+            return shortestPaths.Where(x =>
                 x.TilesBetween.Contains(currentPosition) &&
                 !x.TilesBetween.Any(y => keysHeldExceptForCurrentPosition.Contains(y)) &&
                 x.DoorsBetween.Select(x => _doorToKeyMap[x]).ToHashSet().IsSubsetOf(keysHeld))
                 .ToHashSet();
         }
-
 
         private string ConvertKeysHeldToString(HashSet<char> keysHeld)
         {

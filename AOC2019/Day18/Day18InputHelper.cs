@@ -23,7 +23,7 @@
                     {
                         output.Add(new Tile((xCoord, yCoord), character, isKey: false, isDoor: false, isStartingPosition: false));
                     }
-                    else if (character == '@')
+                    else if (character == '@' || character == '<' || character == '>' || character == '^')
                     {
                         output.Add(new Tile((xCoord, yCoord), character, isKey: false, isDoor: false, isStartingPosition: true));
                     }
