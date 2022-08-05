@@ -47,7 +47,7 @@ namespace AOC2019.Day15
                 PrintResult();
             }
 
-            var bfs = new BreadthFirstSearch(_tiles);
+            var bfs = new Day15BreadthFirstSearch(_tiles);
             var solution = bfs.FindShortestNumberOfStepsFromStartToOxygen();
             Console.WriteLine($"");
             Console.WriteLine($"The solution to part one is '{solution}'.");
@@ -62,7 +62,7 @@ namespace AOC2019.Day15
                 PrintResult();
             }
 
-            var bfs = new BreadthFirstSearch(_tiles);
+            var bfs = new Day15BreadthFirstSearch(_tiles);
             var solution = bfs.FindTimeToFillWithOxygen();
             Console.WriteLine($"");
             Console.WriteLine($"The solution to part two is '{solution}'.");
@@ -77,7 +77,7 @@ namespace AOC2019.Day15
                 PrintResult();
             }
 
-            var bfs = new BreadthFirstSearch(_tiles);
+            var bfs = new Day15BreadthFirstSearch(_tiles);
             var solution1 = bfs.FindShortestNumberOfStepsFromStartToOxygen();
             var solution2 = bfs.FindTimeToFillWithOxygen();
             Console.WriteLine($"");

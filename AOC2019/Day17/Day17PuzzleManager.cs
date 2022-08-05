@@ -4,8 +4,6 @@ namespace AOC2019.Day17
 {
     public class Day17PuzzleManager : PuzzleManager
     {
-        private const int CHARACTERS_IN_VIDEO_FEED = 2347;
-
         public Dictionary<long, long> IntCodeProgram { get; private set; }
 
         public Day17PuzzleManager()

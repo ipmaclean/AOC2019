@@ -1,11 +1,11 @@
 ﻿namespace AOC2019.Day15
 {
-    internal class BreadthFirstSearch
+    internal class Day15BreadthFirstSearch
     {
         public List<Tile> Tiles { get; private set; }
         public Queue<(int xCoord, int yCoord, int steps)> PositionsWithSteps { get; set; } = new Queue<(int, int, int)>();
 
-        public BreadthFirstSearch(List<Tile> tiles)
+        public Day15BreadthFirstSearch(List<Tile> tiles)
         {
             Tiles = tiles;
         }
