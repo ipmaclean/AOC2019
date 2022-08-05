@@ -7,7 +7,6 @@
         public bool IsKey { get; set; }
         public bool IsDoor { get; set; }
         public bool IsStartingPosition { get; set; }
-        public int TentativeDistance { get; set; } = int.MaxValue;
         public bool IsVisited { get; set; } = false;
 
         public Tile(

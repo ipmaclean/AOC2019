@@ -59,6 +59,7 @@
         {
             if (_shortestPathsPartOne.Count == 0)
             {
+                // Takes about 17 seconds
                 _shortestPathsPartOne = FindShortestPaths(TilesPartOne);
             }
             var solution = FindShortestNumberOfStepsToFindAllKeys(TilesPartOne, _shortestPathsPartOne);
@@ -70,7 +71,9 @@
         {
             if (_shortestPathsPartTwo.Count == 0)
             {
+                // Takes about 5 seconds
                 _shortestPathsPartTwo = FindShortestPaths(TilesPartTwo, isPartTwo: true);
+                
             }
             var solution = FindShortestNumberOfStepsToFindAllKeys(TilesPartTwo, _shortestPathsPartTwo, isPartTwo: true);
             Console.WriteLine($"The solution to part one is '{solution}'.");
@@ -95,16 +98,20 @@
             return shortestPaths;
         }
 
-        private void GetAllShortestPathsFromStartingTile(char tile, HashSet<ShortestPath> shortestPaths, int totalNumberOfStartingPositions, List<Tile> allTiles)
+        private void GetAllShortestPathsFromStartingTile(char startingTile, HashSet<ShortestPath> shortestPaths, int totalNumberOfStartingPositions, List<Tile> allTiles)
         {
-            var startTiles = allTiles.Where(x => x.Value == tile);
+            var startTiles = allTiles.Where(x => x.Value == startingTile);
+            foreach (var tile in allTiles)
+            {
+                tile.IsVisited = false;
+            }
             foreach (var startTile in startTiles)
             {
                 var allStates = new Queue<Day18BreadthFirstSearchState>();
-                allStates.Enqueue(new Day18BreadthFirstSearchState(0, startTile, new HashSet<Tile>() { startTile }));
+                allStates.Enqueue(new Day18BreadthFirstSearchState(0, startTile));
                 while (allStates.Count > 0)
                 {
-                    if (shortestPaths.Where(x => x.TilesBetween.Contains(tile)).Count() >= totalNumberOfStartingPositions)
+                    if (shortestPaths.Where(x => x.TilesBetween.Contains(startingTile)).Count() >= totalNumberOfStartingPositions)
                     {
                         return;
                     }
@@ -112,12 +119,12 @@
 
                     foreach (var unexploredNeighbour in FindUnexploredNeighbours(currentState, allTiles))
                     {
-                        if (unexploredNeighbour.IsKey && unexploredNeighbour.Value != tile && !shortestPaths.Any(x => x.TilesBetween.Contains(tile) && x.TilesBetween.Contains(unexploredNeighbour.Value)))
+                        if (unexploredNeighbour.IsKey && unexploredNeighbour.Value != startingTile && !shortestPaths.Any(x => x.TilesBetween.Contains(startingTile) && x.TilesBetween.Contains(unexploredNeighbour.Value)))
                         {
-                            var shortestPath = new ShortestPath(new HashSet<char>() { tile, unexploredNeighbour.Value }, currentState.DoorsBetween, currentState.KeysBetween, currentState.Steps + 1);
+                            var shortestPath = new ShortestPath(new HashSet<char>() { startingTile, unexploredNeighbour.Value }, currentState.DoorsBetween, currentState.KeysBetween, currentState.Steps + 1);
                             shortestPaths.Add(shortestPath);
                         }
-                        var stateToQueue = new Day18BreadthFirstSearchState(currentState.Steps + 1, unexploredNeighbour, currentState.TilesVisited, currentState.DoorsBetween, currentState.KeysBetween);
+                        var stateToQueue = new Day18BreadthFirstSearchState(currentState.Steps + 1, unexploredNeighbour, currentState.DoorsBetween, currentState.KeysBetween);
 
                         if (unexploredNeighbour.IsDoor && !stateToQueue.DoorsBetween.Contains(unexploredNeighbour.Value))
                         {
@@ -127,7 +134,7 @@
                         {
                             stateToQueue.KeysBetween.Add(unexploredNeighbour.Value);
                         }
-                        stateToQueue.TilesVisited.Add(unexploredNeighbour);
+                        unexploredNeighbour.IsVisited = true;
                         allStates.Enqueue(stateToQueue);
                     }
                 }
@@ -141,7 +148,7 @@
             x.Coordinates == (step.CurrentTile.Coordinates.Item1, step.CurrentTile.Coordinates.Item2 - 1) ||
             x.Coordinates == (step.CurrentTile.Coordinates.Item1 + 1, step.CurrentTile.Coordinates.Item2) ||
             x.Coordinates == (step.CurrentTile.Coordinates.Item1 - 1, step.CurrentTile.Coordinates.Item2)
-            ) && !step.TilesVisited.Contains(x));
+            ) && !x.IsVisited);
         }
 
         private int FindShortestNumberOfStepsToFindAllKeys(List<Tile> allTiles, HashSet<ShortestPath> shortestPaths, bool isPartTwo = false)
