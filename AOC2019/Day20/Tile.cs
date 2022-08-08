@@ -6,10 +6,12 @@
         public List<Tile> Neighbours { get; set; } = new List<Tile>();
         public string? TeleportValue { get; set; } = null;
         public bool IsTeleportTile { get; set; } = false;
+        public bool IsInnerTeleportTile { get; set; } = false;
+        public bool IsOuterTeleportTile { get; set; } = false;
         public bool IsTeleportIdentifier { get; set; } = false;
         public bool IsStartingPosition { get; set; } = false;
         public bool IsEndingPosition { get; set; } = false;
-        public bool IsVisited { get; set; } = false;
+        public HashSet<int> VisitedOnLevel { get; set; } = new HashSet<int>();
 
         public Tile((int, int) coordinates,
             string? teleportValue = null,
