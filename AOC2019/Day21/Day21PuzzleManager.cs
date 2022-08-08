@@ -1,9 +1,4 @@
 ﻿using AOC2019.IntCode;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AOC2019.Day21
 {
@@ -20,12 +15,24 @@ namespace AOC2019.Day21
             IntCodeProgram = inputHelper.Parse();
         }
 
-        public override Task SolveBothParts()
+        public override async Task SolveBothParts()
         {
-            throw new NotImplementedException();
+            await SolvePartOne();
+            Console.ReadKey();
+            await SolvePartTwo();
         }
 
         public async override Task SolvePartOne()
+        {
+            await Solve(isPartOne: true);
+        }
+
+        public async override Task SolvePartTwo()
+        {
+            await Solve(isPartOne: false);
+        }
+
+        private async Task Solve(bool isPartOne)
         {
             var codeInput = new Dictionary<long, long>(IntCodeProgram);
             var intCodeComputer = new IntCodeComputer(codeInput);
@@ -35,41 +42,68 @@ namespace AOC2019.Day21
             var tasks = new Task[2];
 
             Console.Clear();
+            var puzzlePart = isPartOne ? "One" : "Two";
+            Console.WriteLine($"Part {puzzlePart}.");
             Console.WriteLine("Would you like to input your own instructions? (y/n)");
+            Console.WriteLine("For Part One end commands with 'WALK', for Part Two end commands with 'RUN'.");
             var manualInput = Console.ReadKey();
             Console.WriteLine("");
 
             if (manualInput.KeyChar == 'y')
             {
-                tasks[0] = RunPartOne(intCodeComputer, true);
+                tasks[0] = Run(intCodeComputer, manualInputMode: true, isPartOne);
             }
             else
             {
-                tasks[0] = RunPartOne(intCodeComputer, false);
+                tasks[0] = Run(intCodeComputer, manualInputMode: false, isPartOne);
             }
             tasks[1] = intCodeComputer.ProcessAsync();
 
             await Task.WhenAll(tasks);
         }
 
-        private async Task RunPartOne(IntCodeComputer intCodeComputer, bool manualInputMode)
+        private async Task Run(IntCodeComputer intCodeComputer, bool manualInputMode, bool isPartOne)
         {
             if (manualInputMode)
             {
                 Console.Clear();
             }
             var inputCounter = 0;
-            var automaticInputs = new string[]
+            string[] automaticInputs;
+            if (isPartOne)
             {
+                automaticInputs = new string[]
+                {
                 "NOT C J",
                 "NOT A T",
                 "OR T J",
                 "AND D J",
                 "WALK"
-            };
+                };
+            }
+            else
+            {
+                automaticInputs = new string[]
+                {
+                "OR A T",
+                "AND B T",
+                "AND C T",
+                "NOT T T",
+                "AND D T",
+                "AND H T",
+                "OR A J",
+                "AND B J",
+                "AND C J",
+                "NOT J J",
+                "AND D J",
+                "AND E J",
+                "OR T J",
+                "RUN"
+                };
+            }
             while (!_intCodeComputerProgramHalted)
             {
-                while (intCodeComputer.Outputs.Count > 1)
+                while (intCodeComputer.Outputs.Count > 1 && !_intCodeComputerProgramHalted)
                 {
                     await Task.Delay(50);
                     AsciiHelper.PrintAscii(intCodeComputer.Outputs);
@@ -97,13 +131,9 @@ namespace AOC2019.Day21
             }
             if (intCodeComputer.Outputs.Count > 0)
             {
-                Console.WriteLine($"The solution to part one is '{intCodeComputer.Outputs.Dequeue()}'.");
+                var puzzlePart = isPartOne ? "one" : "two";
+                Console.WriteLine($"The solution to part {puzzlePart} is '{intCodeComputer.Outputs.Dequeue()}'.");
             }
-        }
-
-        public override Task SolvePartTwo()
-        {
-            throw new NotImplementedException();
         }
 
         private void AwaitingInputHandler(object? sender, EventArgs e)
