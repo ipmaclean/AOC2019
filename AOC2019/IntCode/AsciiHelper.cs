@@ -10,7 +10,7 @@ namespace AOC2019.IntCode
             var sb = new StringBuilder();
             var shouldKeepPrinting = true;
             char oldChar = '0';
-            while (shouldKeepPrinting)
+            while (shouldKeepPrinting && input.Count > 0)
             {
                 var nextChar = (char)input.Dequeue();
                 sb.Append(nextChar);
