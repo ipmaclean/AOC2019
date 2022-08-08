@@ -36,8 +36,7 @@ namespace AOC2019.Day17
             var codeInput = new Dictionary<long, long>(IntCodeProgram);
             var intCodeComputer = new IntCodeComputer(codeInput);
             await intCodeComputer.ProcessAsync();
-            var asciiHelper = new AsciiHelper();
-            var mapAsCharacters = asciiHelper.CharListAscii(intCodeComputer.Outputs);
+            var mapAsCharacters = AsciiHelper.CharListAscii(intCodeComputer.Outputs);
             var solution = GetIntersectionValues(mapAsCharacters);
 
             if (showVideoFeedInput)
@@ -46,7 +45,7 @@ namespace AOC2019.Day17
                 intCodeComputer = new IntCodeComputer(codeInput);
                 await intCodeComputer.ProcessAsync();
                 Console.Clear();
-                asciiHelper.PrintAscii(intCodeComputer.Outputs);
+                AsciiHelper.PrintAscii(intCodeComputer.Outputs);
             }
             return solution;
         }
@@ -95,9 +94,8 @@ namespace AOC2019.Day17
             var codeInput = new Dictionary<long, long>(IntCodeProgram);
             var intCodeComputer = new IntCodeComputer(codeInput);
             await intCodeComputer.ProcessAsync();
-            var asciiHelper = new AsciiHelper();
             Console.Clear();
-            asciiHelper.PrintAscii(intCodeComputer.Outputs);
+            AsciiHelper.PrintAscii(intCodeComputer.Outputs);
 
             var intCodeComputerInputs = new Queue<long>();
 
@@ -108,20 +106,20 @@ namespace AOC2019.Day17
             if (manualInput.KeyChar == 'y')
             {
                 Console.WriteLine("Input main movement routine.");
-                ConvertUserInputAsciiToIntCodeInputAndProvideToIntCodeComputer(intCodeComputerInputs);
+                AsciiHelper.ConvertUserInputAsciiToIntCodeInputAndProvideToIntCodeComputer(intCodeComputerInputs);
                 Console.WriteLine("Input movement function A.");
-                ConvertUserInputAsciiToIntCodeInputAndProvideToIntCodeComputer(intCodeComputerInputs);
+                AsciiHelper.ConvertUserInputAsciiToIntCodeInputAndProvideToIntCodeComputer(intCodeComputerInputs);
                 Console.WriteLine("Input movement function B.");
-                ConvertUserInputAsciiToIntCodeInputAndProvideToIntCodeComputer(intCodeComputerInputs);
+                AsciiHelper.ConvertUserInputAsciiToIntCodeInputAndProvideToIntCodeComputer(intCodeComputerInputs);
                 Console.WriteLine("Input movement function C.");
-                ConvertUserInputAsciiToIntCodeInputAndProvideToIntCodeComputer(intCodeComputerInputs);
+                AsciiHelper.ConvertUserInputAsciiToIntCodeInputAndProvideToIntCodeComputer(intCodeComputerInputs);
             }
             else
             {
-                ConvertAsciiToIntCodeInputAndProvideToIntCodeComputer(intCodeComputerInputs, "A,C,A,C,B,B,C,B,C,A");
-                ConvertAsciiToIntCodeInputAndProvideToIntCodeComputer(intCodeComputerInputs, "R,12,L,8,R,12");
-                ConvertAsciiToIntCodeInputAndProvideToIntCodeComputer(intCodeComputerInputs, "R,8,L,8,R,8,R,4,R,4");
-                ConvertAsciiToIntCodeInputAndProvideToIntCodeComputer(intCodeComputerInputs, "R,8,R,6,R,6,R,8");
+                AsciiHelper.ConvertAsciiToIntCodeInputAndProvideToIntCodeComputer(intCodeComputerInputs, "A,C,A,C,B,B,C,B,C,A");
+                AsciiHelper.ConvertAsciiToIntCodeInputAndProvideToIntCodeComputer(intCodeComputerInputs, "R,12,L,8,R,12");
+                AsciiHelper.ConvertAsciiToIntCodeInputAndProvideToIntCodeComputer(intCodeComputerInputs, "R,8,L,8,R,8,R,4,R,4");
+                AsciiHelper.ConvertAsciiToIntCodeInputAndProvideToIntCodeComputer(intCodeComputerInputs, "R,8,R,6,R,6,R,8");
             }
 
             Console.WriteLine("Would you like to see the continuous video feed? (y/n)");
@@ -140,30 +138,10 @@ namespace AOC2019.Day17
             while (intCodeComputer.Outputs.Count > 1)
             {
                 await Task.Delay(50);
-                asciiHelper.PrintAscii(intCodeComputer.Outputs);
+                AsciiHelper.PrintAscii(intCodeComputer.Outputs);
             }
             var solution = intCodeComputer.Outputs.Dequeue();
             Console.WriteLine($"The solution to part two is '{solution}'.");
-        }
-
-        private void ConvertAsciiToIntCodeInputAndProvideToIntCodeComputer(Queue<long> intCodeComputerInputs, string asciiInput)
-        {
-            foreach (var character in asciiInput)
-            {
-                intCodeComputerInputs.Enqueue(character);
-            }
-            intCodeComputerInputs.Enqueue(10);
-        }
-
-        private void ConvertUserInputAsciiToIntCodeInputAndProvideToIntCodeComputer(Queue<long> intCodeComputerInputs)
-        {
-            var input = Console.ReadLine() ?? string.Empty;
-            var asciiCharString = string.Empty;
-            foreach (var character in input)
-            {
-                intCodeComputerInputs.Enqueue(character);
-            }
-            intCodeComputerInputs.Enqueue(10);
         }
     }
 }
