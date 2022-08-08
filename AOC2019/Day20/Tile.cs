@@ -6,7 +6,6 @@
         public List<Tile> Neighbours { get; set; } = new List<Tile>();
         public string? TeleportValue { get; set; } = null;
         public bool IsTeleportTile { get; set; } = false;
-        public bool IsInnerTeleportTile { get; set; } = false;
         public bool IsOuterTeleportTile { get; set; } = false;
         public bool IsTeleportIdentifier { get; set; } = false;
         public bool IsStartingPosition { get; set; } = false;
@@ -18,7 +17,8 @@
             bool isTeleportTile = false,
             bool isTeleportIdentifier = false,
             bool isStartingPosition = false,
-            bool isEndingPosition = false)
+            bool isEndingPosition = false,
+            bool isOuterTeleportTile = false)
         {
             Coordinates = coordinates;
             TeleportValue = teleportValue;
@@ -26,6 +26,7 @@
             IsTeleportIdentifier = isTeleportIdentifier;
             IsStartingPosition = isStartingPosition;
             IsEndingPosition = isEndingPosition;
+            IsOuterTeleportTile = isOuterTeleportTile;
         }
     }
 }

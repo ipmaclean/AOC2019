@@ -9,6 +9,18 @@
         public override List<Tile> Parse()
         {
             var output = new List<Tile>();
+            var maxXCoord = 0;
+            var maxYCoord = -1;
+            using (var sr = new StreamReader(InputPath))
+            {
+                string ln;
+                while ((ln = sr.ReadLine()!) != null)
+                {
+                    maxXCoord = Math.Max(maxXCoord, ln.Length - 1);
+                    maxYCoord++;
+                }
+            }
+
             using (var sr = new StreamReader(InputPath))
             {
                 string ln;
@@ -29,7 +41,18 @@
                         }
                         else
                         {
-                            output.Add(new Tile((xCoord++, yCoord), isTeleportIdentifier: true, teleportValue: character.ToString()));
+                            var isOuterTeleportTile = false;
+
+                            if (xCoord == 0 || xCoord == maxXCoord || yCoord == 0 || yCoord == maxYCoord)
+                            {
+                                isOuterTeleportTile = true;
+                            }
+
+                            output.Add(
+                                new Tile((xCoord++, yCoord),
+                                isTeleportIdentifier: true, 
+                                teleportValue: character.ToString(),
+                                isOuterTeleportTile: isOuterTeleportTile));
                         }
                     }
                     yCoord++;
@@ -50,7 +73,7 @@
         private void AddTeleportNeighboursStartingAndFinishingTilesThenPruneTiles(List<Tile> tiles)
         {
             var teleportIdentifierTiles = tiles.Where(x => x.IsTeleportIdentifier);
-            foreach(var identifierTile in teleportIdentifierTiles)
+            foreach (var identifierTile in teleportIdentifierTiles)
             {
                 var teleportIdentifierList = new List<string>();
                 var neighbours = tiles.Where(
@@ -92,6 +115,10 @@
                 {
                     teleporterTile.IsTeleportTile = true;
                     teleporterTile.TeleportValue = teleportIdentifierString;
+                    if (identifierTile.IsOuterTeleportTile || otherTeleporterIdentifier.IsOuterTeleportTile)
+                    {
+                        teleporterTile.IsOuterTeleportTile = true;
+                    }
                 }
             }
 
