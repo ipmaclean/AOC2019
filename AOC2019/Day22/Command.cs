@@ -3,9 +3,9 @@
     internal class Command
     {
         public CommandDescription Description { get; set; }
-        public int Value { get; set; }
+        public long Value { get; set; }
 
-        public Command(CommandDescription description, int value)
+        public Command(CommandDescription description, long value)
         {
             Description = description;
             Value = value;

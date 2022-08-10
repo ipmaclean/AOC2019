@@ -21,7 +21,7 @@ namespace AOC2019.Day22
                     {
                         var numberMatch = numberRegex.Match(ln);
                         var number = numberMatch?.Value ?? "0";
-                        output.Add(new Command(CommandDescription.Cut, int.Parse(number)));
+                        output.Add(new Command(CommandDescription.Cut, long.Parse(number)));
                     }
                     else if (ln.Substring(0,19) == "deal into new stack")
                     {
@@ -31,7 +31,7 @@ namespace AOC2019.Day22
                     {
                         var numberMatch = numberRegex.Match(ln);
                         var number = numberMatch?.Value ?? "0";
-                        output.Add(new Command(CommandDescription.DealWithIncrement, int.Parse(number)));
+                        output.Add(new Command(CommandDescription.DealWithIncrement, long.Parse(number)));
                     }
                 }
             }

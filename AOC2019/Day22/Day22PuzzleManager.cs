@@ -2,12 +2,11 @@
 {
     internal class Day22PuzzleManager : PuzzleManager
     {
-        //protected override string INPUT_FILE_NAME { get; set; } = "test4.txt";
-
         public List<Command> Commands { get; set; }
-        public List<int> Deck { get; set; } = new List<int>();
+        public (long Offset, long Increment) DeckMakeup { get; set; } = (0, 0);
 
-        private const int _deckSize = 10007;
+        private const long _deckSizePartOne = 10_007;
+        private const long _deckSizePartTwo = 119_315_717_514_047;
         public Day22PuzzleManager()
         {
             var inputHelper = new Day22InputHelper(INPUT_FILE_NAME);
@@ -21,28 +20,35 @@
 
         public override Task SolvePartOne()
         {
-            Deck = Enumerable.Range(0, _deckSize).ToList();
+            DeckMakeup = (0, 1);
             foreach (var command in Commands)
             {
-                ExecuteCommand(command);
+                ExecuteCommand(command, _deckSizePartOne);
             }
-            var solution = Deck.IndexOf(2019);
+            var index = 0;
+            var offset = DeckMakeup.Offset;
+            while (offset != 2019)
+            {
+                offset = Mod(offset + DeckMakeup.Increment, _deckSizePartOne);
+                index++;
+            }
+            var solution = index;
             Console.WriteLine($"The solution to part one is '{solution}'.");
             return Task.CompletedTask;
         }
 
-        private void ExecuteCommand(Command command)
+        private void ExecuteCommand(Command command, long deckSize)
         {
             switch (command.Description)
             {
                 case CommandDescription.DealIntoNewStack:
-                    Deck.Reverse();
+                    DealIntoNewStack(deckSize);
                     break;
                 case CommandDescription.DealWithIncrement:
-                    DealWithIncrement(command.Value);
+                    DealWithIncrement(command.Value, deckSize);
                     break;
                 case CommandDescription.Cut:
-                    Cut(command.Value);
+                    Cut(command.Value, deckSize);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException("The space deck shuffle command was not valid.");
@@ -50,32 +56,43 @@
 
         }
 
-        private void DealWithIncrement(int commandValue)
+        private void DealIntoNewStack(long deckSize)
         {
-            var newDeck = new int[_deckSize];
-            var dealIndex = 0;
-
-            foreach (var card in Deck)
-            {
-                newDeck[dealIndex] = card;
-                dealIndex = (dealIndex + commandValue) % _deckSize;
-            }
-            Deck = newDeck.ToList();
+            var newIncrement = DeckMakeup.Increment * -1;
+            var newOffset = Mod(DeckMakeup.Offset + newIncrement, deckSize);
+            DeckMakeup = (newOffset, newIncrement);
         }
 
-        private void Cut(int commandValue)
+        private void DealWithIncrement(long commandValue, long deckSize)
         {
-            if (commandValue < 0)
-            {
-                commandValue = _deckSize + commandValue;
-            }
-            Deck.AddRange(Deck.Take(commandValue));
-            Deck.RemoveRange(0, commandValue);
+            var commandValueInverse = ModInverse(commandValue, deckSize);
+            var newIncrement = Mod(DeckMakeup.Increment * commandValueInverse, deckSize);
+            DeckMakeup = (DeckMakeup.Offset, newIncrement);
+        }
+
+        private void Cut(long commandValue, long deckSize)
+        {
+            var newOffset = Mod(DeckMakeup.Offset + DeckMakeup.Increment * commandValue, deckSize);
+            DeckMakeup = (newOffset, DeckMakeup.Increment);
         }
 
         public override Task SolvePartTwo()
         {
             throw new NotImplementedException();
+        }
+
+        private long ModInverse(long a, long m)
+        {
+
+            for (long x = 1; x < m; x++)
+                if (((a % m) * (x % m)) % m == 1)
+                    return x;
+            return 1;
+        }
+
+        private long Mod(long x, long m)
+        {
+            return (x % m + m) % m;
         }
     }
 }
