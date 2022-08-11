@@ -7,36 +7,39 @@
         private Dictionary<long, long> _intCodeProgram;
         private Queue<long> _inputs;
 
+        public int Name { get; set; }
         public Queue<long> Outputs { get; private set; } = new Queue<long>();
         public Queue<long>? ExternalInputs { get; set; }
         public CancellationToken CancellationToken { get; set; }
 
-        public event EventHandler? AwaitingInput;
+        public event EventHandler<int>? AwaitingInput;
         public event EventHandler? ProgramHalted;
 
         public IntCodeComputer(
             Dictionary<long, long> intCodeProgram,
             Queue<long>? inputs = null,
             Queue<long>? externalInputs = null,
-            CancellationToken? cancellationToken = null)
+            CancellationToken? cancellationToken = null,
+            int name = 0) 
         {
             _intCodeProgram = intCodeProgram;
             _inputs = inputs ?? new Queue<long>();
             ExternalInputs = externalInputs;
             CancellationToken = cancellationToken ?? new CancellationTokenSource().Token;
+            Name = name;
         }
 
-        public async Task<Dictionary<long, long>> ProcessAsync(bool manualInputMode = false)
+        public async Task<Dictionary<long, long>> ProcessAsync(bool manualInputMode = false, bool nonBlockingNetworkMode = false)
         {
             while ((Opcode)(_intCodeProgram[_currentPosition] % 100) != Opcode.HALT)
             {
-                await ProcessInstructionAsync(manualInputMode);
+                await ProcessInstructionAsync(manualInputMode, nonBlockingNetworkMode);
             }
             ProgramHalted?.Invoke(this, EventArgs.Empty);
             return _intCodeProgram;
         }
 
-        private async Task ProcessInstructionAsync(bool manualInputMode = false)
+        private async Task ProcessInstructionAsync(bool manualInputMode = false, bool nonBlockingNetworkMode = false)
         {
             switch ((Opcode)(_intCodeProgram[_currentPosition] % 100))
             {
@@ -47,7 +50,7 @@
                     ProcessProductInstruction();
                     break;
                 case Opcode.INPUT:
-                    await ProcessInputInstructionAsync(manualInputMode);
+                    await ProcessInputInstructionAsync(manualInputMode, nonBlockingNetworkMode);
                     break;
                 case Opcode.OUTPUT:
                     ProcessOutputInstruction();
@@ -113,7 +116,7 @@
             if (parameterMode == ParameterMode.POSITION)
             {
                 positionToWrite = GetParameterValue(parameterPosition, ParameterMode.IMMEDIATE);
-                
+
             }
             else if (parameterMode == ParameterMode.RELATIVE)
             {
@@ -127,7 +130,7 @@
             {
                 _intCodeProgram.Add(positionToWrite, valueToWrite);
             }
-            
+
         }
 
         private void ProcessAddInstruction()
@@ -154,13 +157,13 @@
             _currentPosition += 4;
         }
 
-        private async Task ProcessInputInstructionAsync(bool manualInputMode = false)
+        private async Task ProcessInputInstructionAsync(bool manualInputMode = false, bool nonBlockingNetworkMode = false)
         {
             if (manualInputMode)
             {
-                AwaitingInput?.Invoke(this, EventArgs.Empty);
+                AwaitingInput?.Invoke(this, Name);
                 var input = Console.ReadKey();
-                switch(input.Key)
+                switch (input.Key)
                 {
                     case ConsoleKey.LeftArrow:
                         WriteParameterValue(1, -1);
@@ -189,7 +192,17 @@
                     }
                     if (!ExternalInputs!.Any())
                     {
-                        AwaitingInput?.Invoke(this, EventArgs.Empty);
+                        if (nonBlockingNetworkMode)
+                        {
+                            if (CancellationToken.IsCancellationRequested)
+                            {
+                                _intCodeProgram[_currentPosition] = (long)Opcode.HALT;
+                                return;
+                            }
+                            await Task.Delay(1);
+                            ExternalInputs.Enqueue(-1);
+                        }
+                        AwaitingInput?.Invoke(this, Name);
                     }
                     while (!ExternalInputs!.Any())
                     {
@@ -274,7 +287,7 @@
             WriteParameterValue(3, isEqual ? 1 : 0);
             _currentPosition += 4;
         }
-        
+
         private void ProcessAdjustRelativeBaseInstruction()
         {
             _relativeBase += GetParameterValue(1);

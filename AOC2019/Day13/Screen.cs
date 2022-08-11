@@ -132,7 +132,7 @@ namespace AOC2019.Day13
             }
         }
 
-        private void AwaitingInputHandler(object? sender, EventArgs e)
+        private void AwaitingInputHandler(object? sender, int e)
         {
             _intCodeComputerAwaitingInput = true;
         }
