@@ -28,7 +28,7 @@ namespace AOC2019.Day15
             _currentTile = _tiles.First();
         }
 
-        private void AwaitingInputHandler(object? sender, EventArgs e)
+        private void AwaitingInputHandler(object? sender, int e)
         {
             _intCodeComputerAwaitingInput = true;
         }
