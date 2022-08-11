@@ -26,17 +26,17 @@
             CancellationToken = cancellationToken ?? new CancellationTokenSource().Token;
         }
 
-        public async Task<Dictionary<long, long>> ProcessAsync(bool manualInputMode = false)
+        public async Task<Dictionary<long, long>> ProcessAsync(bool manualInputMode = false, bool nonBlockingNetworkMode = false)
         {
             while ((Opcode)(_intCodeProgram[_currentPosition] % 100) != Opcode.HALT)
             {
-                await ProcessInstructionAsync(manualInputMode);
+                await ProcessInstructionAsync(manualInputMode, nonBlockingNetworkMode);
             }
             ProgramHalted?.Invoke(this, EventArgs.Empty);
             return _intCodeProgram;
         }
 
-        private async Task ProcessInstructionAsync(bool manualInputMode = false)
+        private async Task ProcessInstructionAsync(bool manualInputMode = false, bool nonBlockingNetworkMode= false)
         {
             switch ((Opcode)(_intCodeProgram[_currentPosition] % 100))
             {
@@ -47,7 +47,7 @@
                     ProcessProductInstruction();
                     break;
                 case Opcode.INPUT:
-                    await ProcessInputInstructionAsync(manualInputMode);
+                    await ProcessInputInstructionAsync(manualInputMode, nonBlockingNetworkMode);
                     break;
                 case Opcode.OUTPUT:
                     ProcessOutputInstruction();
@@ -154,7 +154,7 @@
             _currentPosition += 4;
         }
 
-        private async Task ProcessInputInstructionAsync(bool manualInputMode = false)
+        private async Task ProcessInputInstructionAsync(bool manualInputMode = false, bool nonBlockingNetworkMode = false)
         {
             if (manualInputMode)
             {
@@ -189,7 +189,20 @@
                     }
                     if (!ExternalInputs!.Any())
                     {
-                        AwaitingInput?.Invoke(this, EventArgs.Empty);
+                        if (nonBlockingNetworkMode)
+                        {
+                            if (CancellationToken.IsCancellationRequested)
+                            {
+                                _intCodeProgram[_currentPosition] = (long)Opcode.HALT;
+                                return;
+                            }
+                            await Task.Delay(1);
+                            ExternalInputs.Enqueue(-1);
+                        }
+                        else
+                        {
+                            AwaitingInput?.Invoke(this, EventArgs.Empty);
+                        }
                     }
                     while (!ExternalInputs!.Any())
                     {
