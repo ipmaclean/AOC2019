@@ -4,9 +4,12 @@ namespace AOC2019.IntCode
 {
     public static class AsciiHelper
     {
-        public static void PrintAscii(Queue<long> input)
+        public static void PrintAscii(Queue<long> input, bool overwrite = true)
         {
-            Console.SetCursorPosition(0, 0);
+            if (overwrite)
+            {
+                Console.SetCursorPosition(0, 0);
+            }
             var sb = new StringBuilder();
             var shouldKeepPrinting = true;
             char oldChar = '0';
